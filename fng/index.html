@@ -206,10 +206,10 @@
 
     async function loadLocations() {
       try {
-        const res = await fetch('/pax/fng/locations.json');
-        const locations = await res.json();
+        const res = await fetch('/api/fng/locations');
+        const data = await res.json();
         const sel = document.getElementById('location');
-        locations.forEach(({ name }) => {
+        (data.locations || []).forEach((name) => {
           const opt = document.createElement('option');
           opt.value = name;
           opt.textContent = name;
