@@ -1003,8 +1003,12 @@
     const last30Start = dateToYmd(new Date(Date.now() - 29 * 24 * 60 * 60 * 1000));
     const monthStart = `${today.slice(0, 7)}-01`;
     const yearStart = `${today.slice(0, 4)}-01-01`;
+    const yearEnd = `${today.slice(0, 4)}-12-31`;
     const monthLabel = now.toLocaleString(undefined, { month: 'long' });
     const windowStart = [last30Start, monthStart, yearStart].sort()[0];
+    // Days remaining in the year, counting today only if no entry logged yet today.
+    const daysLeftInclToday = daysInclusive(today, yearEnd);
+    const GOAL = 1000;
 
     const byPax = {};
     rows.forEach((row) => {
@@ -1022,7 +1026,13 @@
     });
 
     const list = Object.values(byPax)
-      .map((p) => ({ name: p.name, today: round2(p.today), yesterday: round2(p.yesterday), last7: round2(p.last7), last30: round2(p.last30), month: round2(p.month), ytd: round2(p.ytd) }))
+      .map((p) => {
+        const ytd = round2(p.ytd);
+        const todayMiles = round2(p.today);
+        const daysLeft = todayMiles > 0 ? daysLeftInclToday - 1 : daysLeftInclToday;
+        const avgTo1k = ytd >= GOAL ? 0 : (daysLeft <= 0 ? Infinity : round2((GOAL - ytd) / daysLeft));
+        return { name: p.name, today: todayMiles, yesterday: round2(p.yesterday), last7: round2(p.last7), last30: round2(p.last30), month: round2(p.month), ytd, avgTo1k };
+      })
       .filter((p) => p.last30 > 0 || p.month > 0);
 
     const dir = statsSort.dir === 'asc' ? 1 : -1;
@@ -1055,6 +1065,7 @@
               <th><button type="button" data-stats-sort="last30">Last 30 Days${arrow('last30')}</button></th>
               <th><button type="button" data-stats-sort="month">${monthLabel} (MTD)${arrow('month')}</button></th>
               <th><button type="button" data-stats-sort="ytd">YTD${arrow('ytd')}</button></th>
+              <th><button type="button" data-stats-sort="avgTo1k">Daily Avg to 1k${arrow('avgTo1k')}</button></th>
             </tr>
           </thead>
           <tbody>
@@ -1067,6 +1078,7 @@
                 <td>${formatMiles(p.last30)}</td>
                 <td>${formatMiles(p.month)}</td>
                 <td>${formatMiles(p.ytd)}</td>
+                <td>${p.ytd >= GOAL ? '🏆' : (Number.isFinite(p.avgTo1k) ? p.avgTo1k.toFixed(2) : '—')}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -1079,6 +1091,7 @@
               <th>${formatMiles(round2(totals.last30))}</th>
               <th>${formatMiles(round2(totals.month))}</th>
               <th>${formatMiles(round2(totals.ytd))}</th>
+              <th></th>
             </tr>
           </tfoot>
         </table>
