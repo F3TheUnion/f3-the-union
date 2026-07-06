@@ -371,6 +371,13 @@
     </div>
   </div>
 
+  <div class="section" id="closed-challenges-section" style="display: none;">
+    <h2>Closed Challenges</h2>
+    <div class="muted" style="margin-bottom: 0.5rem;">Toggle a challenge to view its final results.</div>
+    <div id="closed-challenge-pills" class="year-pills"></div>
+    <div id="closed-challenges-container"></div>
+  </div>
+
   <div class="section" id="exceptions-section">
     <h2>Potential Exceptions</h2>
     <div id="exceptions-content" class="muted">Loading...</div>
@@ -385,7 +392,9 @@
     <div class="controls">
       <label>
         Name
-        <input id="filter-name" type="text" placeholder="Search name" />
+        <select id="filter-name">
+          <option value="">All</option>
+        </select>
       </label>
       <label>
         Date
@@ -617,13 +626,23 @@
     });
   }
 
+  function renderNameOptions() {
+    const select = document.getElementById('filter-name');
+    const current = select.value;
+    const names = [...new Set(rawRows.map((r) => (r.name || '').trim()).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+    select.innerHTML = '<option value="">All</option>'
+      + names.map((n) => `<option value="${n}">${n}</option>`).join('');
+    if (current && names.includes(current)) select.value = current;
+  }
+
   function applyFilters(rows) {
     const nameValue = document.getElementById('filter-name').value.trim().toLowerCase();
     const dateValue = document.getElementById('filter-date').value;
     const categoryValue = document.getElementById('filter-category').value;
     return rows.filter((row) => {
       if (filterYear && !(row.date || '').startsWith(filterYear)) return false;
-      if (nameValue && !row.name.toLowerCase().includes(nameValue)) return false;
+      if (nameValue && (row.name || '').trim().toLowerCase() !== nameValue) return false;
       if (dateValue && row.date !== dateValue) return false;
       if (!rowMatchesCategory(row, categoryValue)) return false;
       return true;
@@ -766,8 +785,12 @@
   function renderChallenges(challenges, rows) {
     const container = document.getElementById('challenges-container');
     container.innerHTML = '';
-
     (challenges || []).forEach((challenge) => {
+      container.appendChild(buildChallengeSection(challenge, rows));
+    });
+  }
+
+  function buildChallengeSection(challenge, rows) {
       const { startDate, endDate, goalMiles, imageUrl, name, participants } = challenge;
       const participantSet = new Set(participants || []);
 
@@ -866,7 +889,32 @@
       } else {
         section.innerHTML = `<h2>${name}</h2>${tableHtml}`;
       }
-      container.appendChild(section);
+      return section;
+  }
+
+  let closedChallenges = [];
+  const openClosedChallenges = new Set();
+
+  function renderClosedChallengePills() {
+    const container = document.getElementById('closed-challenge-pills');
+    container.innerHTML = '';
+    closedChallenges.forEach((challenge, index) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      const isOpen = openClosedChallenges.has(index);
+      btn.className = 'pill' + (isOpen ? ' pill--active' : '');
+      btn.textContent = challenge.name;
+      btn.dataset.closedChallenge = String(index);
+      container.appendChild(btn);
+    });
+  }
+
+  function renderOpenClosedChallenges() {
+    const container = document.getElementById('closed-challenges-container');
+    container.innerHTML = '';
+    closedChallenges.forEach((challenge, index) => {
+      if (!openClosedChallenges.has(index)) return;
+      container.appendChild(buildChallengeSection(challenge, rawRows));
     });
   }
 
@@ -993,14 +1041,23 @@
 
     const today = dateToYmd(new Date());
     const oneWeekAgo = dateToYmd(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
-    const activeChallenges = (challengeData.challenges || []).filter((c) => c.endDate >= oneWeekAgo);
+    const allChallenges = challengeData.challenges || [];
+    const activeChallenges = allChallenges.filter((c) => c.endDate >= oneWeekAgo);
+    closedChallenges = allChallenges
+      .filter((c) => c.endDate < oneWeekAgo)
+      .sort((a, b) => String(b.endDate).localeCompare(String(a.endDate)));
 
     renderDailySnapshot(rawRows);
     renderYearPills();
     renderLeaderboardYearPills();
     renderLeaderboard();
     renderChallenges(activeChallenges, rawRows);
+    if (closedChallenges.length) {
+      document.getElementById('closed-challenges-section').style.display = '';
+      renderClosedChallengePills();
+    }
     renderExceptions(exceptions.exceptions || []);
+    renderNameOptions();
     applyQueryPrefill();
     renderRawTable();
   }
@@ -1019,6 +1076,19 @@
     filterYear = pill.dataset.year;
     renderYearPills();
     renderRawTable();
+  });
+
+  document.getElementById('closed-challenge-pills').addEventListener('click', (event) => {
+    const pill = event.target.closest('[data-closed-challenge]');
+    if (!pill) return;
+    const index = Number(pill.dataset.closedChallenge);
+    if (openClosedChallenges.has(index)) {
+      openClosedChallenges.delete(index);
+    } else {
+      openClosedChallenges.add(index);
+    }
+    renderClosedChallengePills();
+    renderOpenClosedChallenges();
   });
 
   document.getElementById('raw-section').addEventListener('click', handleSortClick);
