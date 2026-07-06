@@ -7,6 +7,7 @@
     "dev": "node scripts/wrangler.mjs pages dev . --d1 DB=f3_the_union --port 4321",
     "db:migrate": "node scripts/wrangler.mjs d1 migrations apply f3_the_union --local",
     "db:migrate:remote": "node scripts/wrangler.mjs d1 migrations apply f3_the_union --remote",
+    "db:refresh": "node scripts/refresh-local-db.mjs",
     "people:sql": "node scripts/people-csv-to-sql.mjs",
     "miles:sql": "node scripts/miles-json-to-sql.mjs",
     "miles:sheet:sql": "node scripts/miles-sheet-csv-to-sql.mjs",

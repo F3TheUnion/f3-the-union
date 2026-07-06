@@ -96,6 +96,8 @@
       background: none;
       border: 0;
       padding: 0;
+      margin: 0;
+      min-height: 0;
       font: inherit;
       font-weight: 700;
       cursor: pointer;
@@ -212,6 +214,7 @@
     .toggle-btn {
       width: 1.2rem;
       height: 1.2rem;
+      min-height: 0;
       padding: 0;
       border: 1px solid #cdd4e3;
       background: #fff;
@@ -229,6 +232,7 @@
       text-align: center;
       width: 2.2rem;
       vertical-align: middle;
+      line-height: 0;
       padding-top: 0.25rem;
       padding-bottom: 0.25rem;
     }
@@ -282,38 +286,31 @@
       }
     }
 
-    #daily-snapshot {
-      margin: 0.75rem 0;
+    /* Right-justify numeric columns across all tables (decimal points line up). */
+    #stats-by-pax td:not(:first-child),
+    #stats-by-pax th:not(:first-child),
+    #raw-section th:nth-child(n+5),
+    #raw-section td:nth-child(n+5),
+    #summary-section table.striped-by-name > thead th:nth-child(n+3),
+    #summary-section table.striped-by-name > tbody > tr > td:nth-child(n+3),
+    .detail-table th:nth-child(n+2),
+    .detail-table td:nth-child(n+2),
+    #challenges-container th:nth-child(n+2),
+    #challenges-container td:nth-child(n+2),
+    #closed-challenges-container th:nth-child(n+2),
+    #closed-challenges-container td:nth-child(n+2) {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
     }
 
-    .snapshot-section {
-      background: #eef2f9;
-      border: 1px solid #d7dce8;
-      border-radius: 6px;
-      padding: 0.7rem 0.85rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .snapshot-heading {
-      font-weight: 800;
-      color: #1f3b6d;
-      margin-bottom: 0.4rem;
-      font-size: 0.97rem;
-    }
-
-    .snapshot-rows {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.25rem 1.25rem;
-      font-size: 0.93rem;
-    }
-
-    .snapshot-entry {
+    #stats-by-pax th {
       white-space: nowrap;
     }
 
-    .snapshot-name {
-      font-weight: 700;
+    /* Highlight the logged-in PAX's own row in every table. */
+    tr.is-me > td,
+    tr.is-me > th {
+      background: #ffe680 !important;
     }
 
     .year-pills {
@@ -346,7 +343,10 @@
   <div id="top-nav"></div><script src="/shared/top-nav.js"></script>
   <h1>Miles Data</h1>
   <div id="submission-notice" class="notice" hidden></div>
-  <div id="daily-snapshot"></div>
+  <div class="section" id="stats-section">
+    <h2>Recent Miles by PAX</h2>
+    <div id="stats-by-pax"></div>
+  </div>
   <div id="challenges-container"></div>
 
   <div class="section" id="summary-section">
@@ -440,10 +440,12 @@
   const SWIM_MULTIPLIER = 4;
   let rawRows = [];
   let currentSort = { key: 'timestamp', dir: 'desc' };
+  let statsSort = { key: 'last30', dir: 'desc' };
   let monthlyByPerson = {};
   const currentYear = String(new Date().getFullYear());
   let filterYear = currentYear;
   let leaderboardYear = currentYear;
+  let loggedInName = '';
 
   function formatGeneratedAt(value) {
     if (!value) return '';
@@ -466,6 +468,10 @@
 
   function round2(value) {
     return Math.round(value * 100) / 100;
+  }
+
+  function isMe(name) {
+    return !!loggedInName && (name || '').trim().toLowerCase() === loggedInName.trim().toLowerCase();
   }
 
   function dateToYmd(date) {
@@ -697,6 +703,7 @@
       const hasMonthly = (monthlyByPerson[person.name] || []).length > 0;
       const stripeClass = index % 2 === 0 ? 'stripe-a' : '';
       if (stripeClass) tr.classList.add(stripeClass);
+      if (isMe(person.name)) tr.classList.add('is-me');
       tr.innerHTML = `
         <td class="toggle-cell">
           <button type="button" class="toggle-btn" data-toggle="${person.name}" aria-expanded="false" ${hasMonthly ? '' : 'disabled'}>
@@ -845,7 +852,7 @@
             goalCell = `<td style="color:#b02020;font-weight:800;">${formatMilesFixed(entry.milesToGoal)}</td>`;
           }
           return `
-          <tr>
+          <tr class="${isMe(entry.name) ? 'is-me' : ''}">
             <td class="person-name">${entry.name}</td>
             <td>${formatMilesFixed(entry.earned)}</td>
             ${goalCell}
@@ -970,9 +977,11 @@
     const params = new URLSearchParams(window.location.search);
     const name = params.get('name');
     const submitted = params.get('submitted');
-    if (name) {
-      const input = document.getElementById('filter-name');
-      input.value = name;
+    const select = document.getElementById('filter-name');
+    // Default the Name filter to the logged-in PAX; an explicit ?name= wins.
+    const desired = name || loggedInName;
+    if (desired && [...select.options].some((opt) => opt.value === desired)) {
+      select.value = desired;
     }
     if (submitted === '1') {
       const notice = document.getElementById('submission-notice');
@@ -985,59 +994,108 @@
     }
   }
 
-  function renderDailySnapshot(rows) {
-    const container = document.getElementById('daily-snapshot');
-    container.innerHTML = '';
+  function renderStats(rows) {
+    const container = document.getElementById('stats-by-pax');
+    const now = new Date();
+    const today = dateToYmd(now);
+    const yesterday = dateToYmd(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000));
+    const last7Start = dateToYmd(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000));
+    const last30Start = dateToYmd(new Date(Date.now() - 29 * 24 * 60 * 60 * 1000));
+    const monthStart = `${today.slice(0, 7)}-01`;
+    const yearStart = `${today.slice(0, 4)}-01-01`;
+    const monthLabel = now.toLocaleString(undefined, { month: 'long' });
+    const windowStart = [last30Start, monthStart, yearStart].sort()[0];
 
-    function ymd(offsetDays) {
-      const d = new Date();
-      d.setDate(d.getDate() + offsetDays);
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const byPax = {};
+    rows.forEach((row) => {
+      const name = (row.name || '').trim();
+      const date = row.date || '';
+      if (!name || !date || date < windowStart || date > today) return;
+      const earned = rowEarnedMiles(row);
+      if (!byPax[name]) byPax[name] = { name, today: 0, yesterday: 0, last7: 0, last30: 0, month: 0, ytd: 0 };
+      if (date === today) byPax[name].today += earned;
+      if (date === yesterday) byPax[name].yesterday += earned;
+      if (date >= last7Start) byPax[name].last7 += earned;
+      if (date >= last30Start) byPax[name].last30 += earned;
+      if (date >= monthStart) byPax[name].month += earned;
+      if (date >= yearStart) byPax[name].ytd += earned;
+    });
+
+    const list = Object.values(byPax)
+      .map((p) => ({ name: p.name, today: round2(p.today), yesterday: round2(p.yesterday), last7: round2(p.last7), last30: round2(p.last30), month: round2(p.month), ytd: round2(p.ytd) }))
+      .filter((p) => p.last30 > 0 || p.month > 0);
+
+    const dir = statsSort.dir === 'asc' ? 1 : -1;
+    list.sort((a, b) => {
+      if (statsSort.key === 'name') return a.name.localeCompare(b.name) * dir;
+      return (a[statsSort.key] - b[statsSort.key]) * dir || a.name.localeCompare(b.name);
+    });
+
+    if (!list.length) {
+      container.innerHTML = '<div class="muted">No miles logged in the last 30 days.</div>';
+      return;
     }
 
-    const today = ymd(0);
-    const yesterday = ymd(-1);
+    const arrow = (key) => (statsSort.key === key ? (statsSort.dir === 'asc' ? ' ▲' : ' ▼') : '');
 
-    function dayTotals(date) {
-      const byPerson = {};
-      rows.forEach((row) => {
-        if (row.date !== date) return;
-        const name = row.name || '';
-        if (!name) return;
-        if (!byPerson[name]) byPerson[name] = 0;
-        byPerson[name] += rowEarnedMiles(row);
-      });
-      return Object.entries(byPerson)
-        .map(([name, earned]) => ({ name, earned: round2(earned) }))
-        .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) || b.earned - a.earned);
-    }
+    const totals = list.reduce((t, p) => {
+      t.today += p.today; t.yesterday += p.yesterday;
+      t.last7 += p.last7; t.last30 += p.last30; t.month += p.month; t.ytd += p.ytd; return t;
+    }, { today: 0, yesterday: 0, last7: 0, last30: 0, month: 0, ytd: 0 });
 
-    function renderBlock(label, date) {
-      const totals = dayTotals(date);
-      if (!totals.length) return null;
-      const [, month, day] = date.split('-');
-      const entries = totals.map(({ name, earned }) =>
-        `<span class="snapshot-entry"><span class="snapshot-name">${name}</span> ${earned.toFixed(2)}</span>`
-      ).join('');
-      const div = document.createElement('div');
-      div.className = 'snapshot-section';
-      div.innerHTML = `<div class="snapshot-heading">${label} ${month}/${day}</div><div class="snapshot-rows">${entries}</div>`;
-      return div;
-    }
-
-    const blocks = [renderBlock('Today', today), renderBlock('Yesterday', yesterday)].filter(Boolean);
-    blocks.forEach((b) => container.appendChild(b));
+    container.innerHTML = `
+      <div class="table-wrap table-wrap--auto">
+        <table class="striped">
+          <thead>
+            <tr>
+              <th><button type="button" data-stats-sort="name">Name${arrow('name')}</button></th>
+              <th><button type="button" data-stats-sort="today">Today${arrow('today')}</button></th>
+              <th><button type="button" data-stats-sort="yesterday">Yesterday${arrow('yesterday')}</button></th>
+              <th><button type="button" data-stats-sort="last7">Last 7 Days${arrow('last7')}</button></th>
+              <th><button type="button" data-stats-sort="last30">Last 30 Days${arrow('last30')}</button></th>
+              <th><button type="button" data-stats-sort="month">${monthLabel} (MTD)${arrow('month')}</button></th>
+              <th><button type="button" data-stats-sort="ytd">YTD${arrow('ytd')}</button></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${list.map((p) => `
+              <tr class="${isMe(p.name) ? 'is-me' : ''}">
+                <td class="person-name">${p.name}</td>
+                <td>${formatMiles(p.today)}</td>
+                <td>${formatMiles(p.yesterday)}</td>
+                <td>${formatMiles(p.last7)}</td>
+                <td>${formatMiles(p.last30)}</td>
+                <td>${formatMiles(p.month)}</td>
+                <td>${formatMiles(p.ytd)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>Total (${list.length} PAX)</th>
+              <th>${formatMiles(round2(totals.today))}</th>
+              <th>${formatMiles(round2(totals.yesterday))}</th>
+              <th>${formatMiles(round2(totals.last7))}</th>
+              <th>${formatMiles(round2(totals.last30))}</th>
+              <th>${formatMiles(round2(totals.month))}</th>
+              <th>${formatMiles(round2(totals.ytd))}</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>`;
   }
 
   async function init() {
-    const [raw, summary, exceptions, challengeData] = await Promise.all([
+    const [raw, summary, exceptions, challengeData, me] = await Promise.all([
       fetch(`${DATA_BASE}raw`).then((res) => res.json()),
       fetch(`${DATA_BASE}summary`).then((res) => res.json()),
       fetch(`${DATA_BASE}exceptions`).then((res) => res.json()),
       fetch('/api/challenges').then((res) => res.json()),
+      fetch('/api/me').then((res) => (res.ok ? res.json() : null)).catch(() => null),
     ]);
 
     rawRows = Array.isArray(raw.rows) ? raw.rows : [];
+    loggedInName = me && me.person ? (me.person.f3Name || '') : '';
 
     const today = dateToYmd(new Date());
     const oneWeekAgo = dateToYmd(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
@@ -1047,7 +1105,7 @@
       .filter((c) => c.endDate < oneWeekAgo)
       .sort((a, b) => String(b.endDate).localeCompare(String(a.endDate)));
 
-    renderDailySnapshot(rawRows);
+    renderStats(rawRows);
     renderYearPills();
     renderLeaderboardYearPills();
     renderLeaderboard();
@@ -1089,6 +1147,18 @@
     }
     renderClosedChallengePills();
     renderOpenClosedChallenges();
+  });
+
+  document.getElementById('stats-section').addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-stats-sort]');
+    if (!button) return;
+    const key = button.dataset.statsSort;
+    if (statsSort.key === key) {
+      statsSort.dir = statsSort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+      statsSort = { key, dir: key === 'name' ? 'asc' : 'desc' };
+    }
+    renderStats(rawRows);
   });
 
   document.getElementById('raw-section').addEventListener('click', handleSortClick);
