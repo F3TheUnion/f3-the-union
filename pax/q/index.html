@@ -332,15 +332,19 @@
 
     function compareRows(a, b, key) {
       if (key === 'attended_since_last_q' || key === 'days_since_last_q') {
-        const aValue = key === 'days_since_last_q'
-          ? daysSinceLastQ(a)
-          : Number(a[key] || 0);
+        if (key === 'days_since_last_q') {
+          // Never Q PAX display ">60" and have no real day count. Treat them as
+          // longer-ago than any actual value so they sort above 60, not below.
+          const aDays = daysSinceLastQ(a);
+          const bDays = daysSinceLastQ(b);
+          const aValue = aDays === null ? Number.POSITIVE_INFINITY : aDays;
+          const bValue = bDays === null ? Number.POSITIVE_INFINITY : bDays;
 
-        const bValue = key === 'days_since_last_q'
-          ? daysSinceLastQ(b)
-          : Number(b[key] || 0);
+          if (aValue === bValue) return 0;
+          return aValue < bValue ? -1 : 1;
+        }
 
-        return Number(aValue ?? -1) - Number(bValue ?? -1);
+        return Number(a[key] || 0) - Number(b[key] || 0);
       }
 
       if (key === 'last_q_date') {
