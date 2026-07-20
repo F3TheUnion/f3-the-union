@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-07-13T18:45:17.290Z",
+  "generated_at": "2026-07-20T01:36:04.598Z",
   "window_days": 60,
   "region_org_id": 38363,
   "report": "never_q",
   "identity_key": "user_id",
-  "count": 17,
+  "count": 19,
   "data": [
     {
       "pax": "Feeny",
@@ -13,24 +13,6 @@
       "bds_attended": 12,
       "last_attended_date": "2026-07-08",
       "last_attended_ao": "The Dock",
-      "q_status": "Never Q"
-    },
-    {
-      "pax": "Zach Roush",
-      "user_id": "124773",
-      "home_region_id": "38363",
-      "bds_attended": 11,
-      "last_attended_date": "2026-06-25",
-      "last_attended_ao": "The Factory",
-      "q_status": "Never Q"
-    },
-    {
-      "pax": "Salty",
-      "user_id": "123577",
-      "home_region_id": "38363",
-      "bds_attended": 8,
-      "last_attended_date": "2026-07-10",
-      "last_attended_ao": "The Yard",
       "q_status": "Never Q"
     },
     {
@@ -43,6 +25,42 @@
       "q_status": "Never Q"
     },
     {
+      "pax": "Zach Roush",
+      "user_id": "124773",
+      "home_region_id": "38363",
+      "bds_attended": 7,
+      "last_attended_date": "2026-06-25",
+      "last_attended_ao": "The Factory",
+      "q_status": "Never Q"
+    },
+    {
+      "pax": "Salty",
+      "user_id": "123577",
+      "home_region_id": "38363",
+      "bds_attended": 6,
+      "last_attended_date": "2026-07-10",
+      "last_attended_ao": "The Yard",
+      "q_status": "Never Q"
+    },
+    {
+      "pax": "Spladle",
+      "user_id": "123517",
+      "home_region_id": "38363",
+      "bds_attended": 4,
+      "last_attended_date": "2026-07-17",
+      "last_attended_ao": "The Floor",
+      "q_status": "Never Q"
+    },
+    {
+      "pax": "Guano",
+      "user_id": "119134",
+      "home_region_id": "38363",
+      "bds_attended": 4,
+      "last_attended_date": "2026-07-15",
+      "last_attended_ao": "The Dock",
+      "q_status": "Never Q"
+    },
+    {
       "pax": "GoldStar",
       "user_id": "128140",
       "home_region_id": "38363",
@@ -52,12 +70,12 @@
       "q_status": "Never Q"
     },
     {
-      "pax": "Guano",
-      "user_id": "119134",
+      "pax": "William Woodrum",
+      "user_id": "129323",
       "home_region_id": "38363",
-      "bds_attended": 4,
-      "last_attended_date": "2026-07-01",
-      "last_attended_ao": "The Dock",
+      "bds_attended": 3,
+      "last_attended_date": "2026-07-16",
+      "last_attended_ao": "The Clocktower",
       "q_status": "Never Q"
     },
     {
@@ -70,12 +88,21 @@
       "q_status": "Never Q"
     },
     {
-      "pax": "Spladle",
-      "user_id": "123517",
+      "pax": "Newman",
+      "user_id": "130310",
       "home_region_id": "38363",
-      "bds_attended": 3,
-      "last_attended_date": "2026-06-26",
-      "last_attended_ao": "The Floor",
+      "bds_attended": 1,
+      "last_attended_date": "2026-07-15",
+      "last_attended_ao": "The Dock",
+      "q_status": "Never Q"
+    },
+    {
+      "pax": "Charlotte",
+      "user_id": "122864",
+      "home_region_id": "25157",
+      "bds_attended": 1,
+      "last_attended_date": "2026-07-14",
+      "last_attended_ao": "The Clocktower",
       "q_status": "Never Q"
     },
     {
@@ -94,15 +121,6 @@
       "bds_attended": 1,
       "last_attended_date": "2026-07-10",
       "last_attended_ao": "The Yard",
-      "q_status": "Never Q"
-    },
-    {
-      "pax": "William Woodrum",
-      "user_id": "129323",
-      "home_region_id": "38363",
-      "bds_attended": 1,
-      "last_attended_date": "2026-07-09",
-      "last_attended_ao": "The Clocktower",
       "q_status": "Never Q"
     },
     {
