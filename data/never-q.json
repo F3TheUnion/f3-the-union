@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-20T01:36:04.598Z",
+  "generated_at": "2026-07-27T01:35:53.189Z",
   "window_days": 60,
   "region_org_id": 38363,
   "report": "never_q",
@@ -25,19 +25,19 @@
       "q_status": "Never Q"
     },
     {
-      "pax": "Zach Roush",
-      "user_id": "124773",
+      "pax": "Guano",
+      "user_id": "119134",
       "home_region_id": "38363",
-      "bds_attended": 7,
-      "last_attended_date": "2026-06-25",
-      "last_attended_ao": "The Factory",
+      "bds_attended": 5,
+      "last_attended_date": "2026-07-22",
+      "last_attended_ao": "The Dock",
       "q_status": "Never Q"
     },
     {
       "pax": "Salty",
       "user_id": "123577",
       "home_region_id": "38363",
-      "bds_attended": 6,
+      "bds_attended": 5,
       "last_attended_date": "2026-07-10",
       "last_attended_ao": "The Yard",
       "q_status": "Never Q"
@@ -52,21 +52,21 @@
       "q_status": "Never Q"
     },
     {
-      "pax": "Guano",
-      "user_id": "119134",
-      "home_region_id": "38363",
-      "bds_attended": 4,
-      "last_attended_date": "2026-07-15",
-      "last_attended_ao": "The Dock",
-      "q_status": "Never Q"
-    },
-    {
       "pax": "GoldStar",
       "user_id": "128140",
       "home_region_id": "38363",
       "bds_attended": 4,
       "last_attended_date": "2026-07-07",
       "last_attended_ao": "The Clocktower",
+      "q_status": "Never Q"
+    },
+    {
+      "pax": "Zach Roush",
+      "user_id": "124773",
+      "home_region_id": "38363",
+      "bds_attended": 4,
+      "last_attended_date": "2026-06-25",
+      "last_attended_ao": "The Factory",
       "q_status": "Never Q"
     },
     {
@@ -85,6 +85,15 @@
       "bds_attended": 3,
       "last_attended_date": "2026-07-02",
       "last_attended_ao": "The Show",
+      "q_status": "Never Q"
+    },
+    {
+      "pax": "Coyote",
+      "user_id": "130205",
+      "home_region_id": "38363",
+      "bds_attended": 1,
+      "last_attended_date": "2026-07-22",
+      "last_attended_ao": "The Farm",
       "q_status": "Never Q"
     },
     {
@@ -166,15 +175,6 @@
       "bds_attended": 1,
       "last_attended_date": "2026-05-29",
       "last_attended_ao": "The Floor",
-      "q_status": "Never Q"
-    },
-    {
-      "pax": "Boo-Boo",
-      "user_id": "99763",
-      "home_region_id": "38363",
-      "bds_attended": 1,
-      "last_attended_date": "2026-05-25",
-      "last_attended_ao": "The Farm",
       "q_status": "Never Q"
     }
   ]
