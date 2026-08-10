@@ -1,18 +1,18 @@
 {
-  "generated_at": "2026-08-03T01:35:55.102Z",
+  "generated_at": "2026-08-10T01:36:32.272Z",
   "window_days": 60,
   "region_org_id": 38363,
   "report": "never_q",
   "identity_key": "user_id",
-  "count": 35,
+  "count": 36,
   "data": [
     {
       "pax": "Feeny",
       "user_id": "99867",
       "home_region_id": "38363",
-      "bds_attended": 12,
-      "last_attended_date": "2026-07-08",
-      "last_attended_ao": "The Dock",
+      "bds_attended": 11,
+      "last_attended_date": "2026-08-06",
+      "last_attended_ao": "The Show",
       "q_status": "Never Q"
     },
     {
@@ -29,17 +29,17 @@
       "user_id": "119134",
       "home_region_id": "38363",
       "bds_attended": 5,
-      "last_attended_date": "2026-07-29",
+      "last_attended_date": "2026-08-05",
       "last_attended_ao": "The Dock",
       "q_status": "Never Q"
     },
     {
-      "pax": "Salty",
-      "user_id": "123577",
+      "pax": "Coyote",
+      "user_id": "130205",
       "home_region_id": "38363",
       "bds_attended": 4,
-      "last_attended_date": "2026-07-10",
-      "last_attended_ao": "The Yard",
+      "last_attended_date": "2026-08-05",
+      "last_attended_ao": "The Farm",
       "q_status": "Never Q"
     },
     {
@@ -79,12 +79,12 @@
       "q_status": "Never Q"
     },
     {
-      "pax": "Coyote",
-      "user_id": "130205",
+      "pax": "Salty",
+      "user_id": "123577",
       "home_region_id": "38363",
       "bds_attended": 2,
-      "last_attended_date": "2026-07-29",
-      "last_attended_ao": "The Farm",
+      "last_attended_date": "2026-07-10",
+      "last_attended_ao": "The Yard",
       "q_status": "Never Q"
     },
     {
@@ -94,6 +94,24 @@
       "bds_attended": 2,
       "last_attended_date": "2026-06-25",
       "last_attended_ao": "The Factory",
+      "q_status": "Never Q"
+    },
+    {
+      "pax": "Lombard",
+      "user_id": "131885",
+      "home_region_id": "38363",
+      "bds_attended": 1,
+      "last_attended_date": "2026-08-07",
+      "last_attended_ao": "The Yard",
+      "q_status": "Never Q"
+    },
+    {
+      "pax": "Pom Pom",
+      "user_id": "131886",
+      "home_region_id": "38363",
+      "bds_attended": 1,
+      "last_attended_date": "2026-08-07",
+      "last_attended_ao": "The Floor",
       "q_status": "Never Q"
     },
     {
@@ -309,15 +327,6 @@
       "home_region_id": "36758",
       "bds_attended": 1,
       "last_attended_date": "2026-06-19",
-      "last_attended_ao": "The Yard",
-      "q_status": "Never Q"
-    },
-    {
-      "pax": "Baja Blast",
-      "user_id": "126594",
-      "home_region_id": "38363",
-      "bds_attended": 1,
-      "last_attended_date": "2026-06-05",
       "last_attended_ao": "The Yard",
       "q_status": "Never Q"
     }
