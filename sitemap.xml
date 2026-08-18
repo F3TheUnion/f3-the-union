@@ -1,23 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hand-maintained. Public, indexable pages only.
+
+  Deliberately absent, do not add:
+    /fng/     - marked noindex,nofollow; a noindex URL here reports as an error in GSC
+    /login/   - marked noindex
+    /pax/*    - member area, also disallowed in robots.txt
+
+  lastmod is each page's last commit date, from git log for that file.
+  Update it when you change a page. changefreq and priority were dropped: Google
+  ignores both, so they were bytes that did nothing.
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://f3theunion.com/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
+    <lastmod>2026-06-16T15:19:36-04:00</lastmod>
   </url>
   <url>
     <loc>https://f3theunion.com/core-principles/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <lastmod>2026-06-16T15:01:43-04:00</lastmod>
   </url>
   <url>
     <loc>https://f3theunion.com/gallery/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <lastmod>2026-06-16T15:01:43-04:00</lastmod>
   </url>
   <url>
     <loc>https://f3theunion.com/testimonials/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <lastmod>2026-06-16T15:19:36-04:00</lastmod>
   </url>
 </urlset>
