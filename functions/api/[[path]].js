@@ -126,7 +126,11 @@ class ApiError extends Error {
 function json(data, init = {}) {
   return Response.json(data, {
     ...init,
-    headers: { 'content-type': 'application/json', ...(init.headers || {}) },
+    headers: {
+      'content-type': 'application/json',
+      'cache-control': 'private, no-store',
+      ...(init.headers || {}),
+    },
   });
 }
 

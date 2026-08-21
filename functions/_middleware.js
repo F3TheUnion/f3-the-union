@@ -8,7 +8,10 @@ export async function onRequest(ctx) {
   if (!token || !(await hasValidSession(ctx, token))) {
     const loginUrl = new URL('/login/', url.origin);
     loginUrl.searchParams.set('next', `${url.pathname}${url.search}`);
-    return Response.redirect(loginUrl.toString(), 302);
+    return new Response(null, {
+      status: 302,
+      headers: { location: loginUrl.toString(), 'cache-control': 'private, no-store' },
+    });
   }
 
   return ctx.next();
