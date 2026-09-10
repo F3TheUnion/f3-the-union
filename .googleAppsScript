@@ -1423,10 +1423,15 @@ function runBigQuery(query) {
   let result = BigQuery.Jobs.query(request, BQ_PROJECT_ID);
   const jobId = result.jobReference.jobId;
 
+  // getQueryResults needs the job's location, or it looks in the default region
+  // and fails with 'Not found: Job'. Only bites when the query does not finish
+  // inside Jobs.query's timeout, or when the results paginate.
+  const location = result.jobReference.location;
+
   // wait for completion
   while (!result.jobComplete) {
     Utilities.sleep(500);
-    result = BigQuery.Jobs.getQueryResults(BQ_PROJECT_ID, jobId);
+    result = BigQuery.Jobs.getQueryResults(BQ_PROJECT_ID, jobId, { location: location });
   }
 
   const headers = result.schema.fields.map(f => f.name);
@@ -1435,7 +1440,7 @@ function runBigQuery(query) {
   let pageToken = null;
   do {
     const page = pageToken
-      ? BigQuery.Jobs.getQueryResults(BQ_PROJECT_ID, jobId, { pageToken })
+      ? BigQuery.Jobs.getQueryResults(BQ_PROJECT_ID, jobId, { pageToken: pageToken, location: location })
       : result;
 
     (page.rows || []).forEach(r => {
