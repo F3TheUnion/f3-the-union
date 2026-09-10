@@ -16,15 +16,11 @@ Status: `[ ]` todo · `[x]` done · `[-]` declined
 
 ## Secrets
 
-- [ ] **3. Revoke 3 live Slack webhooks exposed in a PUBLIC repo.**
-  github.com/F3TheUnion/f3-the-union is public, so these are readable by anyone
-  and let a stranger post into the F3 Slack:
-  - `:614` Kotter committee room (active code)
-  - `:615` debugging room (commented out)
-  - `:951` KoG (dormant code, live webhook)
-
-  Not a KoG issue — dead code still leaks a working credential. Revoke all three
-  in Slack; re-issue only the Kotter one, into Script Properties.
+- [x] **3. Slack webhooks removed from the file.**
+  All three now read from Script Properties: `KOTTER_WEBHOOK_URL`,
+  `DEBUGGING_WEBHOOK_URL`, `KOG_WEBHOOK_URL`. The file was never pushed, and the
+  two local commits containing the URLs were squashed away, so the webhooks never
+  reached the public repo and did not need rotating.
 
 - [x] **4. `GITHUB_REPO` updated** to `F3TheUnion/f3-the-union` after the repo moved.
   Still verify `GITHUB_TOKEN` has write access under the new org.
@@ -44,7 +40,7 @@ Status: `[ ]` todo · `[x]` done · `[-]` declined
 
 ## Organization
 
-- [ ] **8. Add `const` to `KOG_START_DATE`** (~958) — currently an implicit global.
+- [-] **8. Add `const` to `KOG_START_DATE`.** DECLINED — KoG code, ignored.
 
 - [ ] **9. Hoist all constants into one config block at the top.**
   They currently sit in 9 places: lines 2, 166, 484, 629, 706, 951, 1638, 2111, 2258.
@@ -57,5 +53,6 @@ Status: `[ ]` todo · `[x]` done · `[-]` declined
 
 ## Pending this session
 
+- [x] Committed as `dbfe7cc` (unpushed).
 - [ ] Flip `DEBUG_ON` back to `false` before the trigger fires for real.
-- [ ] Commit the site-Q DM change (`DEBUG_ON`, `GITHUB_REPO`, `sendSiteQDM_`).
+- [ ] Add the 3 webhook Script Properties in the Apps Script editor.
