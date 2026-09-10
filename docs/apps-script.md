@@ -4,8 +4,8 @@ A local mirror of the Apps Script project bound to the F3 The Union Google Sheet
 **reference copy** — the source of truth is the Apps Script editor in Google. Nothing in the
 Pages app imports it. Keep it in sync by hand after editing in the Apps Script IDE.
 
-In Google it is split across several `.gs` files; here it is concatenated into one file, which
-is why a few helpers appear twice (see [Known warts](#known-warts)).
+It was assembled by pasting half a dozen separate `.gs` files together, on purpose — keep it as
+one file.
 
 ## What it does
 
@@ -215,11 +215,6 @@ testing — otherwise a run DMs 12 real people.
 
 ## Known warts
 
-- **Duplicated definitions.** `getSlackUserId`, `normalizeName`, `getCachedUserId`,
-  `saveUserIdToCache`, `lookupSlackUserIdFromApi`, and `testLookup` are each defined twice
-  (~lines 76–162 and ~197–323). The bodies are identical, so the second definition silently
-  wins. This is an artifact of concatenating separate `.gs` files. Harmless, but do not "fix"
-  one copy and leave the other.
 - **Loose globals.** `KOG_START_DATE` is assigned without `const`/`let`. `slackToken`, `userId`,
   `kinevil`, `floppy`, `uniball` are test leftovers at the top level.
 - **Hardcoded webhook.** See the note under Secrets.

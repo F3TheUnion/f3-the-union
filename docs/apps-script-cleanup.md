@@ -28,10 +28,10 @@ Status: `[ ]` todo · `[x]` done · `[-]` declined
 
 ## Dead code
 
-- [ ] **5. Delete duplicate helper definitions.**
-  `getSlackUserId`, `normalizeName`, `getCachedUserId`, `saveUserIdToCache`,
-  `lookupSlackUserIdFromApi`, `testLookup` are each defined twice (~76–162 and
-  ~197–323) from the merge. Identical bodies; the second silently wins.
+- [x] **5. Duplicate helper definitions removed.** Verified the 5 real helpers
+  had byte-identical bodies before deleting the first copy (97 lines). The two
+  `testLookup`s differed only in the test name; kept the `DUFRESNE` one. No
+  duplicate function names remain in the file.
 
 - [ ] **6. Delete test leftover globals** (~629–633): `kinevil`, `floppy`,
   `uniball`, `slackToken`, `userId`.
