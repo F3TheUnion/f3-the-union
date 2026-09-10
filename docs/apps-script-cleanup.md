@@ -10,9 +10,10 @@ Status: `[ ]` todo · `[x]` done · `[-]` declined
   KoG was a 2026 season thing and is over. If it runs again it starts fresh.
   All KoG code in this file is dormant; ignore it.
 
-- [ ] **2. Kotter block is dead code.**
-  `readKotterData` (~492) uses `url`, `Database_username`, `Database_password` —
-  none are defined anywhere in the file. `pushKotter` cannot run. Fix or delete.
+- [x] **2. Kotter block removed.** Confirmed leftover from a dropped MySQL/JDBC
+  setup. Deleted `SHEET_NAME`, `readKotterData`, `pushKotter`, `pushKotterData`,
+  `sendKotterAlert` (140 lines). `KOTTER_WEBHOOK_URL` is no longer needed as a
+  Script Property.
 
 ## Secrets
 

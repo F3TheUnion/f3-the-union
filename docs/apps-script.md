@@ -29,11 +29,8 @@ Read via `PropertiesService.getScriptProperties()`:
 | Property | Used for |
 | --- | --- |
 | `slackBotToken` | All Slack Web API calls (`users.list`, `conversations.open`, `chat.postMessage`, file uploads) |
+| `KOG_WEBHOOK_URL` | The dormant KoG standings post |
 | `GITHUB_TOKEN` | `ghRequest_` — committing generated JSON to `abereanone/f3-the-union` |
-
-> **Note:** `SLACK_WEBHOOK_URL` (line ~946, the KoG webhook) is hardcoded in the file rather than
-> stored as a Script Property. It is a live credential sitting in the repo. Rotate it and move it
-> into Script Properties when convenient.
 
 ### Constants
 
@@ -106,10 +103,6 @@ stale entry keeps resolving. Clear `slackUserId_*` from Script Properties to for
 - `getTargetChannel_(id)` — the `DEBUG_ON` router.
 - `senduniquePAXPerWeek`, `sendAveragePAXPerAOChart`, `sendBeatdownChartToSlack`,
   `sendRedZoneChartToSlack` — per-chart wrappers.
-
-### Kotter list
-- `readKotterData()`, `pushKotter()`, `pushKotterData(data)`, `sendKotterAlert(payload)` —
-  read the `NewKotterList` tab and push/alert.
 
 ### Open Q slots
 - `postOpenQSlotsToSiteQs()` — the real entry point; see below.
