@@ -49,11 +49,12 @@ that crosses between them:
 
 | List | Key format | Purpose |
 | --- | --- | --- |
-| `AO_SITEQ` (~line 166) | slug — `the_fountain` | Maps AO → site Q's F3 name (e.g. `Puppy mill`) |
-| `AO_CONFIG` (~line 2260) | display name — `The Fountain` | Maps AO → channel ID, enabled flag, `weeksAhead` |
+| `AO_SITEQ` (~line 69) | slug — `the_fountain` | Maps AO → site Q's F3 name (e.g. `Puppy mill`) |
+| `AO_CONFIG` (~line 92) | display name — `The Fountain` | Maps AO → channel ID, enabled flag, `weeksAhead` |
 
-They cover the same 13 AOs. `AO_SITEQ` is keyed by slug, `AO_CONFIG` by display name — a
-normalizing map is required to join them. Note `Peach` is site Q for **two** AOs
+They cover the same 13 AOs and now sit adjacent at the top of the file, so a change to one is
+hard to make without seeing the other. `AO_SITEQ` is keyed by slug, `AO_CONFIG` by display
+name — `aoSlug_()` joins them. Note `Peach` is site Q for **two** AOs
 (`the_breakroom` and `the_clocktower`).
 
 ## Function map

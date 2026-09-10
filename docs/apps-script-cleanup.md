@@ -47,9 +47,16 @@ Status: `[ ]` todo · `[x]` done · `[-]` declined
 
 - [-] **8. Add `const` to `KOG_START_DATE`.** DECLINED — KoG code, ignored.
 
-- [ ] **9. Hoist all constants into one config block at the top.**
-  They currently sit in 9 places: lines 2, 166, 484, 629, 706, 951, 1638, 2111, 2258.
-  This is most of the "disorganized" feeling.
+- [x] **9. AO tables paired.** Scoped down after looking: most constants were already
+  at the top. The one that could actually cause a bug was `AO_SITEQ` (line 69) and
+  `AO_CONFIG` (line 1943) being 1,900 lines apart despite being two halves of the
+  same table. `AO_CONFIG` now sits directly below `AO_SITEQ` with a comment
+  explaining the slug/display-name split.
+
+  Deliberately NOT hoisted: `KOG_SCORE_ADJUSTMENTS` (60 lines of dead 2026 data —
+  moving it up would bury the constants that matter), plus the chart titles,
+  `BQ_PROJECT_ID` and `NEVER_Q_DATA_BRANCH` one-liners, which sit next to their
+  only callers.
 
 - [ ] **10. Add section banners and reorder** into:
   Config → shared utils (Slack / GitHub / BigQuery) → jobs (Charts, KoG, Metrics,

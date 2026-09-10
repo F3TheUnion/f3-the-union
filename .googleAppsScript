@@ -82,6 +82,29 @@ const AO_SITEQ = [
   { ao: 'the_cafeteria', siteQ: 'Alice' }
 ];
 
+// The other half of the AO table: which channel each AO posts to, whether it is
+// enabled, and how far ahead to look. Keyed by DISPLAY NAME ("The Fountain");
+// AO_SITEQ above is keyed by SLUG ("the_fountain"). aoSlug_() joins the two, so
+// keep both lists covering the same AOs.
+
+const DEFAULT_WEEKS_AHEAD = 2;
+
+const AO_CONFIG = [
+  { ao: 'The Fountain',   channelId: SLACK_CHANNEL_THE_FOUNTAIN,   enabled: true, weeksAhead: 2 },
+  { ao: 'The Farm',       channelId: SLACK_CHANNEL_THE_FARM,       enabled: true, weeksAhead: 2 },
+  { ao: 'The Plant',      channelId: SLACK_CHANNEL_THE_PLANT,      enabled: true, weeksAhead: 2 },
+  { ao: 'The Clocktower', channelId: SLACK_CHANNEL_THE_CLOCKTOWER, enabled: true, weeksAhead: 2 },
+  { ao: 'The Yard',       channelId: SLACK_CHANNEL_THE_YARD,       enabled: true, weeksAhead: 2 },
+  { ao: 'The Factory',    channelId: SLACK_CHANNEL_THE_FACTORY,    enabled: true, weeksAhead: 2 },
+  { ao: 'The Floor',      channelId: SLACK_CHANNEL_THE_FLOOR,      enabled: true, weeksAhead: 2 },
+  { ao: 'The Redzone',    channelId: SLACK_CHANNEL_THE_REDZONE,    enabled: true, weeksAhead: 2 },
+  { ao: 'The Show',       channelId: SLACK_CHANNEL_THE_SHOW,       enabled: true, weeksAhead: 1 },
+  { ao: 'The Dock',       channelId: SLACK_CHANNEL_THE_DOCK,       enabled: true, weeksAhead: 2 },
+  { ao: 'The Cafeteria',  channelId: SLACK_CHANNEL_THE_CAFETERIA,  enabled: true, weeksAhead: 2 },
+  { ao: 'The Forge',      channelId: SLACK_CHANNEL_THE_FORGE,      enabled: true, weeksAhead: 2 },
+  { ao: 'The Breakroom',  channelId: SLACK_CHANNEL_THE_BREAKROOM,  enabled: true, weeksAhead: 2 },
+];
+
 function getAoToSiteQMap() {
   const map = {};
   AO_SITEQ.forEach(({ ao, siteQ }) => {
@@ -1938,26 +1961,6 @@ function rowsToNeverQObjects(headers, rows) {
     return obj;
   });
 }
-// ── Configuration ────────────────────────────────────────────────────────────
-
-const DEFAULT_WEEKS_AHEAD = 2;
-
-const AO_CONFIG = [
-  { ao: 'The Fountain',   channelId: SLACK_CHANNEL_THE_FOUNTAIN,   enabled: true, weeksAhead: 2 },
-  { ao: 'The Farm',       channelId: SLACK_CHANNEL_THE_FARM,       enabled: true, weeksAhead: 2 },
-  { ao: 'The Plant',      channelId: SLACK_CHANNEL_THE_PLANT,      enabled: true, weeksAhead: 2 },
-  { ao: 'The Clocktower', channelId: SLACK_CHANNEL_THE_CLOCKTOWER, enabled: true, weeksAhead: 2 },
-  { ao: 'The Yard',       channelId: SLACK_CHANNEL_THE_YARD,       enabled: true, weeksAhead: 2 },
-  { ao: 'The Factory',    channelId: SLACK_CHANNEL_THE_FACTORY,    enabled: true, weeksAhead: 2 },
-  { ao: 'The Floor',      channelId: SLACK_CHANNEL_THE_FLOOR,      enabled: true, weeksAhead: 2 },
-  { ao: 'The Redzone',    channelId: SLACK_CHANNEL_THE_REDZONE,    enabled: true, weeksAhead: 2 },
-  { ao: 'The Show',       channelId: SLACK_CHANNEL_THE_SHOW,       enabled: true, weeksAhead: 1 },
-  { ao: 'The Dock',       channelId: SLACK_CHANNEL_THE_DOCK,       enabled: true, weeksAhead: 2 },
-  { ao: 'The Cafeteria',  channelId: SLACK_CHANNEL_THE_CAFETERIA,  enabled: true, weeksAhead: 2 },
-  { ao: 'The Forge',      channelId: SLACK_CHANNEL_THE_FORGE,      enabled: true, weeksAhead: 2 },
-  { ao: 'The Breakroom',  channelId: SLACK_CHANNEL_THE_BREAKROOM,  enabled: true, weeksAhead: 2 },
-];
-
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 /**
