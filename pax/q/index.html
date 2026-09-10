@@ -481,7 +481,7 @@
     }
 
     async function init() {
-      const response = await fetch(REPORT_URL);
+      const response = await fetch(REPORT_URL, { cache: 'no-store' });
 
       if (!response.ok) {
         throw new Error(`Unable to load Q report: ${response.status}`);
