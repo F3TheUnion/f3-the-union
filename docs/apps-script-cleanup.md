@@ -58,10 +58,17 @@ Status: `[ ]` todo · `[x]` done · `[-]` declined
   `BQ_PROJECT_ID` and `NEVER_Q_DATA_BRANCH` one-liners, which sit next to their
   only callers.
 
-- [ ] **10. Add section banners and reorder** into:
-  Config → shared utils (Slack / GitHub / BigQuery) → jobs (Charts, KoG, Metrics,
-  Kotter, Open Q). Today the Slack helpers are split apart by an unrelated
-  `AO_SITEQ` block.
+- [x] **10a. Section banners added.** Eight `====` banners mark CONFIG, the two
+  Slack areas, GitHub, Charts, KoG, BigQuery and Open Q Slots. Also replaced the
+  file's opening line (it said "Chart title constants", 390 lines from any chart
+  title) with a real header, and dropped the stale `SlackCharts_NewAPI.gs` block
+  that claimed constants lived "in other files". Comments only — verified the
+  diff touches no code.
+
+- [-] **10b. Reorder functions into those sections.** DECLINED — Apps Script does
+  not care about definition order and the existing grouping is already sensible,
+  so this buys appearance only at the cost of a ~2,000-line diff that cannot be
+  reviewed by eye.
 
 ## Pending this session
 

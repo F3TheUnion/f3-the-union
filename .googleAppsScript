@@ -1,4 +1,19 @@
-// Chart title constants (from your existing script)
+// F3 The Union - Google Apps Script
+//
+// One file on purpose. It was assembled from half a dozen separate .gs files;
+// keep it as one. A local mirror lives in the repo at .googleAppsScript, but the
+// Apps Script editor is the source of truth - sync by hand after editing there.
+//
+// Sections below are marked with ==== banners. Secrets come from Script
+// Properties, never from this file. See docs/apps-script.md.
+
+// ============================================================================
+// CONFIG
+// ============================================================================
+
+// DEBUG_ON reroutes BOTH channel posts (getTargetChannel_) and site Q DMs
+// (sendSiteQDM_) to the debugging channel / the Comms Q. Turn it on before
+// testing anything that messages real people.
 const DEBUG_ON = true;
 
 const slackBotToken = PropertiesService.getScriptProperties().getProperty('slackBotToken');
@@ -112,6 +127,10 @@ function getAoToSiteQMap() {
   });
   return map;
 }
+
+// ============================================================================
+// SLACK - USER LOOKUP AND DM
+// ============================================================================
 
 /****************************************************
  * Returns a Slack userId for a given username.
@@ -255,6 +274,10 @@ function testLookup() {
   const id = getSlackUserId("DUFRESNE");
   Logger.log(id);  // e.g. "U07Q0LD16LE"
 }
+// ============================================================================
+// GITHUB - COMMIT GENERATED JSON
+// ============================================================================
+
 function ghRequest_(url, method, payload) {
   const token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
 
@@ -365,6 +388,10 @@ function testGitHubAuth() {
   Logger.log(res.getContentText());
 }
 
+// ============================================================================
+// SLACK - MEMBER / REGION QUERIES
+// ============================================================================
+
 function buildUnionRegionQuery() {
   const members = fetchAllSlackMembers_();
 
@@ -419,6 +446,10 @@ const closeTo100    = 'APPROACHING OR OVER 100';
 const redzonetotal  = 'Redzone Patch Leaderboard';
 const milestotal    = '2026 Miles';
 
+// ============================================================================
+// CHARTS - SHEET CHARTS TO SLACK
+// ============================================================================
+
 function sendAllTheCharts() {
   doAllMetrics();
   sendAveragePAXPerAOChart();
@@ -435,18 +466,7 @@ function getTargetChannel_(normalChannelId) {
   return normalChannelId;
 }
 
-/**
- * SlackCharts_NewAPI.gs
- *
- * Uses Slack's new external upload API to send Google Sheets charts to channels.
- *
- * EXPECTS these global constants to exist in other files:
- *   const slackBotToken = 'xoxb-...';
- *   const SLACK_CHANNEL_GOALS;
- *   const SLACK_CHANNEL_1ST_F_FITNESS;
- *   const SLACK_CHANNEL_THE_REDZONE;
- *   // (optional) const SLACK_CHANNEL_DEBUGGING;
- */
+// Sends Sheet charts to Slack via the external upload API.
 
 // ----------------- Internal helpers -----------------
 
@@ -729,6 +749,10 @@ const KOG_SCORE_ADJUSTMENTS = [
   { week: '2026-02-09', pax: 'Charlotte'     ,delta: 1, reason: '+1 OOT AO 2/11'         },
   { week: '2026-02-09', pax: 'BodyPump'      ,delta: 1, reason: '+1 OOT AO #the_rock'    },
 ];
+
+// ============================================================================
+// KOG - DORMANT (2026 season, kept for reference)
+// ============================================================================
 
 function regenScores() {
   buildFactPaxEvents();
@@ -1346,6 +1370,10 @@ function sendKoGSlackUpdate() {
 const BQ_PROJECT_ID = 'f3data';
 const EXCLUDED_PAX = [];
 
+// ============================================================================
+// BIGQUERY - METRICS, Q REPORT, NEVER-Q
+// ============================================================================
+
 function doAllMetrics() {
   getPaxMetricsBQ();
   getRZMetricsBQ();
@@ -1961,7 +1989,9 @@ function rowsToNeverQObjects(headers, rows) {
     return obj;
   });
 }
-// ── Main ─────────────────────────────────────────────────────────────────────
+// ============================================================================
+// OPEN Q SLOTS - DM THE SITE QS
+// ============================================================================
 
 /**
  * Kept so the existing time-based trigger (bound to this name) keeps firing.
@@ -2061,7 +2091,7 @@ function postOpenQSlotsToSiteQs() {
   orphans.forEach(function(entry) { postEntryToChannel_(entry); });
 }
 
-// ── Open Q slot message builders ─────────────────────────────────────────────
+// ---- open Q slot message builders ----
 
 /** 'The Fountain' -> 'the_fountain', to join AO_CONFIG against AO_SITEQ. */
 function aoSlug_(aoName) {
@@ -2115,7 +2145,7 @@ function sendSiteQDM_(siteQName, text) {
   sendSlackDMByUsername_(siteQName, text);
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ---- open Q slot helpers ----
 
 function postMessageToSlack_(channelId, text) {
   const res = UrlFetchApp.fetch('https://slack.com/api/chat.postMessage', {
