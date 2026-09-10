@@ -1,0 +1,2460 @@
+// Chart title constants (from your existing script)
+const DEBUG_ON = true;
+
+const slackBotToken = PropertiesService.getScriptProperties().getProperty('slackBotToken');
+
+const GITHUB_REPO = 'F3TheUnion/f3-the-union';
+const COMMZQ = 'Floppy Disk';
+
+const SLACK_CHANNEL_DEBUGGING                = 'C03TPUJ5WSV';
+const SLACK_CHANNEL_KOG                      = 'C0A6L8T2D2T';
+const SLACK_CHANNEL_3RD_F_FAITH              = 'C03RXQ9E12T';
+const SLACK_CHANNEL_THE_BREAKROOM            = 'C03S5PGKZ1C';
+const SLACK_CHANNEL_QSCHEDULE_CALENDAR       = 'C03S5R67XK8';
+const SLACK_CHANNEL_MUMBLECHATTER            = 'C03S98T4GR3';
+const SLACK_CHANNEL_2ND_F_FELLOWSHIP         = 'C03S9A96DRB';
+const SLACK_CHANNEL_GLOOM_MOMENTS            = 'C03S9H78B45';
+const SLACK_CHANNEL_1ST_F_FITNESS            = 'C03SC7HLN66';
+const SLACK_CHANNEL_THE_FARM                 = 'C03SC9U3JCB';
+const SLACK_CHANNEL_THE_YARD                 = 'C03SCB1G343';
+const SLACK_CHANNEL_THE_FACTORY              = 'C03SEQVDJ3E';
+const SLACK_CHANNEL_THE_PLANT                = 'C03SR2R5AMP';
+const SLACK_CHANNEL_PODCAST_FEED             = 'C03SWJWHYG4';
+const SLACK_CHANNEL_MARKETPLACE              = 'C03T27BKENL';
+const SLACK_CHANNEL_GOOD_EATS                = 'C0434MU6STD';
+
+const SLACK_CHANNEL_KOG_THE_FOUNTAIN         = 'C04BTB5KUCX';
+const SLACK_CHANNEL_KOG_THE_REDZONE          = 'C04C7Q89B8T';
+const SLACK_CHANNEL_KOG_THE_FARM             = 'C04C7TC3RJ6';
+const SLACK_CHANNEL_KOG_THE_FLOOR            = 'C04CXJEMW5N';
+const SLACK_CHANNEL_KOG_THE_FACTORY          = 'C04CXJG676U';
+
+const SLACK_CHANNEL_THE_REDZONE              = 'C04D8JHJHPS';
+const SLACK_CHANNEL_CSAUP                    = 'C04EM7FG44W';
+const SLACK_CHANNEL_KOG_THE_DOCK             = 'C04GP92KDGX';
+const SLACK_CHANNEL_75HARD                   = 'C04H38EP77X';
+const SLACK_CHANNEL_MILECHALLENGE            = 'C04J27NAZCG';       // _milechallenge
+const SLACK_CHANNEL_THE_CAFETERIA            = 'C04MJLJ8MJB';
+const SLACK_CHANNEL_THE_FLOOR                = 'C04MS0UJHP0';
+
+const SLACK_CHANNEL_GTE                      = 'C052X2YNWRL';
+const SLACK_CHANNEL_MAY_2023_HARDOS_CURLS    = 'C054VQ444V7';
+const SLACK_CHANNEL_MAY_2023_MONSTARS        = 'C05561RN9BK';
+
+const SLACK_CHANNEL_THE_DOCK                 = 'C05LTUXCSCF';
+const SLACK_CHANNEL_FANTASY_FOOTBALL         = 'C05LW1U29RN';
+
+const SLACK_CHANNEL_GOALS                    = 'C0654HAGRLY';
+const SLACK_CHANNEL_THE_SHOW                 = 'C066VQJLJGL';
+
+const SLACK_CHANNEL_SWORDSMEN                = 'C06CA2TTTEC';
+const SLACK_CHANNEL_KOG_THE_SHOW             = 'C06CQ4X96F2';
+const SLACK_CHANNEL_THE_DOWNRANGE            = 'C06J36HGTQW';
+const SLACK_CHANNEL_HALF_MARATHON_TRAINING   = 'C06RYJFAXC5';       // _half_marathon_training
+
+const SLACK_CHANNEL_G_DOGGGS_GOOD_EATS       = 'C079JDLJMHD';
+const SLACK_CHANNEL_THE_FOUNTAIN             = 'C07E8QBMJ58';
+const SLACK_CHANNEL_FANTASTY_FOOTBALL        = 'C07HK712C75';
+
+const SLACK_CHANNEL_KOG_THE_PLANT            = 'C086EB05407';
+const SLACK_CHANNEL_KOG_THE_YARD             = 'C086USH0C10';
+const SLACK_CHANNEL_SWORDSMEN_2025           = 'C086YQLSPKM';
+
+const SLACK_CHANNEL_THE_FORGE                = 'C08CNFCKKD2';
+const SLACK_CHANNEL_THE_CLOCKTOWER           = 'C08PSLE3VUM';
+
+const SLACK_CHANNEL_KIDS_SUMMER_2025         = 'C090QA8KC2G';
+const SLACK_CHANNEL_TRAINING_DUMP            = 'C09DJCYCNJ0';
+
+/****************************************************
+ * Returns a Slack userId for a given username.
+ * - Normalizes the username
+ * - Checks cache (persistent)
+ * - If not cached, fetches from Slack
+ * - Saves into cache
+ ****************************************************/
+function getSlackUserId(username) {
+  const normalized = normalizeName(username);
+
+  // 1. Check persistent cache
+  const cachedId = getCachedUserId(normalized);
+  if (cachedId) {
+    Logger.log("cached"); 
+    return cachedId;
+  }
+  Logger.log("not cached"); 
+
+  // 2. Not cached → lookup from Slack API
+  const userId = lookupSlackUserIdFromApi(username);
+
+  // 3. Save to cache
+  saveUserIdToCache(normalized, userId);
+
+  return userId;
+}
+
+
+/****************************************************
+ * Normalizes username: lowercase + remove spaces.
+ ****************************************************/
+function normalizeName(name) {
+  return name.toLowerCase().replace(/\s+/g, "");
+}
+
+
+/****************************************************
+ * Gets a cached Slack userId from Script Properties.
+ ****************************************************/
+function getCachedUserId(normalizedName) {
+  const props = PropertiesService.getScriptProperties();
+  return props.getProperty("slackUserId_" + normalizedName);
+}
+
+
+/****************************************************
+ * Saves a Slack userId into persistent Script Properties.
+ ****************************************************/
+function saveUserIdToCache(normalizedName, userId) {
+  const props = PropertiesService.getScriptProperties();
+  props.setProperty("slackUserId_" + normalizedName, userId);
+}
+
+
+/****************************************************
+ * Calls Slack API: users.list
+ * Searches by normalized display name, real name, username
+ ****************************************************/
+function lookupSlackUserIdFromApi(name) {
+  const slackToken = slackBotToken; // you must define slackBotToken
+
+  const res = UrlFetchApp.fetch("https://slack.com/api/users.list", {
+    method: "get",
+    headers: {
+      Authorization: "Bearer " + slackToken,
+    },
+    muteHttpExceptions: true,
+  });
+
+  const data = JSON.parse(res.getContentText());
+
+  if (!data.ok) {
+    throw new Error("Slack API error: " + data.error);
+  }
+
+  const target = normalizeName(name);
+
+  for (const member of data.members) {
+    if (!member.profile) continue;
+
+    const displayNorm = normalizeName(member.profile.display_name || "");
+    const realNorm    = normalizeName(member.profile.real_name || "");
+    const userNorm    = normalizeName(member.name || "");
+
+    // Match any normalized variant
+    if (target === displayNorm || target === realNorm || target === userNorm) {
+      return member.id; // success
+    }
+  }
+
+  throw new Error("Slack user not found: " + name);
+}
+
+function testLookup() {
+  const id = getSlackUserId("uniball");
+  Logger.log(id);  // e.g. "U07Q0LD16LE"
+}
+const AO_SITEQ = [
+  { ao: 'the_breakroom', siteQ: 'Peach' },
+  { ao: 'the_clocktower', siteQ: 'Peach' },
+  { ao: 'the_dock', siteQ: 'Coffin' },
+  { ao: 'the_factory', siteQ: 'Charlotte' },
+  { ao: 'the_farm', siteQ: 'DUFRESNE' },
+  { ao: 'the_floor', siteQ: 'Dewey' },
+  { ao: 'the_forge', siteQ: 'Dorothy' },
+  { ao: 'the_fountain', siteQ: 'Puppy mill' },
+  { ao: 'the_plant', siteQ: 'Iceberg' },
+  { ao: 'the_redzone', siteQ: 'Ocho' },
+  { ao: 'the_show', siteQ: 'Bumblebee' },
+  { ao: 'the_yard', siteQ: 'Barf' },
+  { ao: 'the_cafeteria', siteQ: 'Alice' }
+];
+
+function getAoToSiteQMap() {
+  const map = {};
+  AO_SITEQ.forEach(({ ao, siteQ }) => {
+    map[ao] = siteQ;
+  });
+  return map;
+}
+
+/****************************************************
+ * Returns a Slack userId for a given username.
+ * - Normalizes the username
+ * - Checks cache (persistent)
+ * - If not cached, fetches from Slack
+ * - Saves into cache
+ ****************************************************/
+function getSlackUserId(username) {
+  const normalized = normalizeName(username);
+
+  // 1. Check persistent cache
+  const cachedId = getCachedUserId(normalized);
+  if (cachedId) {
+    Logger.log("cached"); 
+    return cachedId;
+  }
+  Logger.log("not cached"); 
+
+  // 2. Not cached → lookup from Slack API
+  const userId = lookupSlackUserIdFromApi(username);
+
+  // 3. Save to cache
+  saveUserIdToCache(normalized, userId);
+
+  return userId;
+}
+
+
+/****************************************************
+ * Normalizes username: lowercase + remove spaces.
+ ****************************************************/
+function normalizeName(name) {
+  return name.toLowerCase().replace(/\s+/g, "");
+}
+
+
+/****************************************************
+ * Gets a cached Slack userId from Script Properties.
+ ****************************************************/
+function getCachedUserId(normalizedName) {
+  const props = PropertiesService.getScriptProperties();
+  return props.getProperty("slackUserId_" + normalizedName);
+}
+
+
+/****************************************************
+ * Saves a Slack userId into persistent Script Properties.
+ ****************************************************/
+function saveUserIdToCache(normalizedName, userId) {
+  const props = PropertiesService.getScriptProperties();
+  props.setProperty("slackUserId_" + normalizedName, userId);
+}
+
+
+function sendSlackDMByUsername_(username, text) {
+  const userId = getSlackUserId(username);
+
+  const openRes = UrlFetchApp.fetch(
+    'https://slack.com/api/conversations.open',
+    {
+      method: 'post',
+      contentType: 'application/json',
+      headers: {
+        Authorization: 'Bearer ' + slackBotToken
+      },
+      payload: JSON.stringify({ users: userId }),
+      muteHttpExceptions: true
+    }
+  );
+
+  const openData = JSON.parse(openRes.getContentText());
+  if (!openData.ok) {
+    throw new Error('Unable to open DM for ' + username + ': ' + openData.error);
+  }
+
+  const channelId = openData.channel.id;
+
+  const postRes = UrlFetchApp.fetch(
+    'https://slack.com/api/chat.postMessage',
+    {
+      method: 'post',
+      contentType: 'application/json',
+      headers: {
+        Authorization: 'Bearer ' + slackBotToken
+      },
+      payload: JSON.stringify({
+        channel: channelId,
+        text
+      }),
+      muteHttpExceptions: true
+    }
+  );
+
+  const postData = JSON.parse(postRes.getContentText());
+  if (!postData.ok) {
+    throw new Error('Unable to DM ' + username + ': ' + postData.error);
+  }
+}
+
+/****************************************************
+ * Calls Slack API: users.list
+ * Searches by normalized display name, real name, username
+ ****************************************************/
+function lookupSlackUserIdFromApi(name) {
+  const slackToken = slackBotToken; // you must define slackBotToken
+
+  const res = UrlFetchApp.fetch("https://slack.com/api/users.list", {
+    method: "get",
+    headers: {
+      Authorization: "Bearer " + slackToken,
+    },
+    muteHttpExceptions: true,
+  });
+
+  const data = JSON.parse(res.getContentText());
+
+  if (!data.ok) {
+    throw new Error("Slack API error: " + data.error);
+  }
+
+  const target = normalizeName(name);
+
+  for (const member of data.members) {
+    if (!member.profile) continue;
+
+    const displayNorm = normalizeName(member.profile.display_name || "");
+    const realNorm    = normalizeName(member.profile.real_name || "");
+    const userNorm    = normalizeName(member.name || "");
+
+    // Match any normalized variant
+    if (target === displayNorm || target === realNorm || target === userNorm) {
+      return member.id; // success
+    }
+  }
+
+  throw new Error("Slack user not found: " + name);
+}
+
+function testLookup() {
+  const id = getSlackUserId("DUFRESNE");
+  Logger.log(id);  // e.g. "U07Q0LD16LE"
+}
+function ghRequest_(url, method, payload) {
+  const token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+
+  const params = {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/vnd.github+json'
+    },
+    muteHttpExceptions: false
+  };
+
+  if (payload) {
+    params.contentType = 'application/json';
+    params.payload = JSON.stringify(payload);
+  }
+
+  return JSON.parse(UrlFetchApp.fetch(url, params).getContentText());
+}
+
+function sheetToJSON(sheetName) {
+  const ss = SpreadsheetApp.getActive();
+  const sheet = ss.getSheetByName(sheetName);
+
+  if (!sheet) {
+    throw new Error(`Sheet not found: ${sheetName}`);
+  }
+
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) return [];
+
+  const headers = values.shift();
+
+  return values.map(row => {
+    const obj = {};
+    headers.forEach((h, i) => {
+      obj[h] = row[i];
+    });
+    return obj;
+  });
+}
+
+function commitFilesToGitHubSingleCommit(branch, message, files) {
+  const repo = GITHUB_REPO;
+  const base = `https://api.github.com/repos/${repo}`;
+
+  // 1. get current HEAD
+  const ref = ghRequest_(`${base}/git/refs/heads/${branch}`, 'get');
+  const headSha = ref.object.sha;
+
+  const commit = ghRequest_(`${base}/git/commits/${headSha}`, 'get');
+  const baseTree = commit.tree.sha;
+
+  // 3. create blobs
+  const tree = [];
+
+  Object.entries(files).forEach(([path, data]) => {
+    const blob = ghRequest_(`${base}/git/blobs`, 'post', {
+      content: JSON.stringify(data, null, 2)
+    });
+
+    tree.push({
+      path,
+      mode: '100644',
+      type: 'blob',
+      sha: blob.sha
+    });
+  });
+
+  // 4. create tree
+  const newTree = ghRequest_(`${base}/git/trees`, 'post', {
+    base_tree: baseTree,
+    tree
+  });
+
+  // 5. create commit
+  const newCommit = ghRequest_(`${base}/git/commits`, 'post', {
+    message: message,
+    tree: newTree.sha,
+    parents: [headSha]
+  });
+
+  // 6. move branch
+  ghRequest_(`${base}/git/refs/heads/${branch}`, 'patch', {
+    sha: newCommit.sha
+  });
+
+  Logger.log('The data was committed in ONE commit.');
+}
+
+function testGitHubAuth() {
+  const token = (PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN') || '').trim();
+
+  Logger.log('Token exists: ' + !!token);
+  Logger.log('Token length: ' + token.length);
+
+  const res = UrlFetchApp.fetch('https://api.github.com/user', {
+    method: 'get',
+    headers: {
+      Authorization: 'Bearer ' + token,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28'
+    },
+    muteHttpExceptions: true
+  });
+
+  Logger.log('Code: ' + res.getResponseCode());
+  Logger.log(res.getContentText());
+}
+
+function buildUnionRegionQuery() {
+  const members = fetchAllSlackMembers_();
+
+  const names = new Set();
+  members.forEach(m => {
+    if (m.deleted || m.is_bot || m.id === 'USLACKBOT') return;
+    const p = m.profile || {};
+    const name = (p.display_name || p.real_name || '').trim();
+    if (name) names.add(name);
+  });
+
+  const sorted = [...names].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+  const inList = sorted
+    .map(n => `'${n.toLowerCase().replace(/'/g, "''")}'`)  // lowercase + escape apostrophes
+    .join(',\n  ');
+
+  const sql =
+`SELECT DISTINCT user_id, home_region_id, f3_name
+FROM \`f3data.analytics.attendance_info\`
+WHERE LOWER(TRIM(f3_name)) IN (
+  ${inList}
+)
+ORDER BY f3_name;`;
+
+  Logger.log('PAX count: ' + sorted.length);
+  Logger.log(sql);
+  return sql;
+}
+
+// Paginates users.list so you get the whole workspace, not just the first page.
+function fetchAllSlackMembers_() {
+  const members = [];
+  let cursor = '';
+  do {
+    const url = 'https://slack.com/api/users.list?limit=200'
+      + (cursor ? '&cursor=' + encodeURIComponent(cursor) : '');
+    const res = UrlFetchApp.fetch(url, {
+      headers: { Authorization: 'Bearer ' + slackBotToken },
+      muteHttpExceptions: true,
+    });
+    const data = JSON.parse(res.getContentText());
+    if (!data.ok) throw new Error('Slack API error: ' + data.error);
+    (data.members || []).forEach(m => members.push(m));
+    cursor = data.response_metadata && data.response_metadata.next_cursor;
+  } while (cursor);
+  return members;
+}
+const SHEET_NAME = 'NewKotterList'
+
+function readKotterData() {
+  var conn = Jdbc.getConnection(url+'?useSSL=false', Database_username, Database_password);
+  var stmt = conn.createStatement();
+
+  var sql = `
+WITH last_eligible AS (
+  SELECT
+    pax,
+    \`Date\` AS last_post_date,
+    AO     AS last_post_ao,
+    ROW_NUMBER() OVER (
+      PARTITION BY pax
+      ORDER BY \`Date\` DESC
+    ) AS rn
+  FROM attendance_view
+  WHERE pax NOT IN ('d')
+    AND AO NOT IN ('the_cafeteria','the_breakroom','the_forge')
+),
+kotter AS (
+  SELECT
+    pax,
+    last_post_date,
+    last_post_ao,
+    DATEDIFF(CURRENT_DATE(), last_post_date) AS days_since_last_post
+  FROM last_eligible
+  WHERE rn = 1
+)
+SELECT
+  pax,
+  last_post_date,
+  days_since_last_post,
+  last_post_ao
+FROM kotter
+WHERE (days_since_last_post BETWEEN 14 AND 28)
+   OR (days_since_last_post BETWEEN 49 AND 63)
+ORDER BY last_post_ao, days_since_last_post
+`;
+
+  var results = stmt.executeQuery(sql);
+
+  var metaData=results.getMetaData();
+  var numCols = metaData.getColumnCount();
+  var spreadsheet = SpreadsheetApp.getActive();
+  var sheet = spreadsheet.getSheetByName(SHEET_NAME);
+  var headerRow = sheet.getRange("1:1");
+  sheet.clearContents();
+  var arr=[];
+  
+
+  for (var col = 0; col < numCols; col++) {
+    arr.push(metaData.getColumnName(col + 1));
+  }
+  
+  sheet.appendRow(arr);
+
+
+  while (results.next()) {
+    arr=[];
+    for (var col = 0; col < numCols; col++) {
+      arr.push(results.getString(col + 1));
+    }
+    sheet.appendRow(arr);
+  }
+  
+  results.close();
+  stmt.close();
+  sheet.autoResizeColumns(1, numCols+1);
+} 
+
+function pushKotter() {
+
+  readKotterData();
+  const ss = SpreadsheetApp.getActive();
+
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return; // nothing but header (or empty)
+
+  var lastCol = sheet.getLastColumn(); // will be 4 now if ID is removed
+  var data = sheet.getRange(1, 1, lastRow, lastCol).getValues();
+
+  var payload = pushKotterData(data);
+  Logger.log(JSON.stringify(payload, null, 2));
+  sendKotterAlert(payload);
+}
+
+function pushKotterData(data) {
+  let stats = data.slice(1).map(function(row) {
+    return "_*" + row[0] + "*_\nLast Beatdown AO: *" + row[3] + "*\nDays Since Last Beatdown *" + row[2]   + "*\nLast Beatdown Date: " + Utilities.formatDate(row[1],"EST","yyyy-MM-dd");
+  }).join("\n\n");
+
+  let payload = {
+    "blocks": [
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": ":alert: *NEW KOTTER ALERT* :alert:"
+        }
+      },
+      {
+        "type": "divider"
+      },
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "_PAX who have now missed betweeen 14 and 70 Days._"
+        }
+      },
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": stats
+        }
+      }
+    ]
+  };
+  return payload;
+}
+
+function sendKotterAlert(payload) {
+  // Kotter committee room. Swap to DEBUGGING_WEBHOOK_URL to test.
+  const webhook = PropertiesService.getScriptProperties().getProperty('KOTTER_WEBHOOK_URL');
+  var options = {
+    "method": "post", 
+    "contentType": "application/json", 
+    "muteHttpExceptions": true, 
+    "payload": JSON.stringify(payload) 
+  };
+  
+  try {
+    UrlFetchApp.fetch(webhook, options);
+  } catch(e) {
+    Logger.log(e);
+  }
+}
+const kinevil = "U042QBZ2XBR"
+const floppy  = "U07Q0LD16LE"
+const uniball = "U03SC4X4AG3"
+const slackToken = slackBotToken;
+const userId = uniball;
+
+function sendSlackTest() {
+ 
+  const payload = {
+    channel: userId,
+    text: "Hello from Google Apps Script! Proof of concept works."
+  };
+
+  const response = UrlFetchApp.fetch("https://slack.com/api/chat.postMessage", {
+    method: "post",
+    contentType: "application/json",
+    headers: {
+      Authorization: "Bearer " + slackToken,
+    },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true,
+  });
+
+  Logger.log(response.getContentText());
+}
+
+function sendSlackDM() {
+
+  // Step 1: open a DM channel
+  const openRes = UrlFetchApp.fetch("https://slack.com/api/conversations.open", {
+    method: "post",
+    contentType: "application/json",
+    headers: {
+      Authorization: "Bearer " + slackToken,
+    },
+    payload: JSON.stringify({
+      users: userId
+    }),
+    muteHttpExceptions: true,
+  });
+
+  const openData = JSON.parse(openRes.getContentText());
+
+  if (!openData.ok) {
+    throw new Error("Unable to open DM: " + openData.error);
+  }
+
+  const channelId = openData.channel.id;
+
+  // Step 2: send a message to that DM channel
+  const msgRes = UrlFetchApp.fetch("https://slack.com/api/chat.postMessage", {
+    method: "post",
+    contentType: "application/json",
+    headers: {
+      Authorization: "Bearer " + slackToken,
+    },
+    payload: JSON.stringify({
+      channel: channelId,
+      text: "Hello from Floppy Google Apps Script! In this way, I can write automated scripts to reach out to PAX over slack. For example, we can send everyone a personalized message with their fitness test score and some brief explanation. Since I cannot see your messages, let me know that you see this."
+    }),
+    muteHttpExceptions: true,
+  });
+
+  Logger.log(msgRes.getContentText());
+}
+
+function debugOpenDM() {
+
+  const openRes = UrlFetchApp.fetch("https://slack.com/api/conversations.open", {
+    method: "post",
+    contentType: "application/json",
+    headers: {
+      Authorization: "Bearer " + slackToken,
+    },
+    payload: JSON.stringify({
+      users: userId
+    }),
+    muteHttpExceptions: true,
+  });
+
+  Logger.log(openRes.getContentText());
+}
+const uniquePAXPerWeek   = 'Unique PAX across the Region, per Week';
+const averagePAXPerAO   = 'Average pax per AO, per Month';
+const beatdowntotal = 'YTD Beatdowns - Minimum 10';
+const closeTo100    = 'APPROACHING OR OVER 100';
+const redzonetotal  = 'Redzone Patch Leaderboard';
+const milestotal    = '2026 Miles';
+
+function sendAllTheCharts() {
+  doAllMetrics();
+  sendAveragePAXPerAOChart();
+  sendBeatdownChartToSlack();
+  sendRedZoneChartToSlack();
+  senduniquePAXPerWeek();
+}
+
+
+function getTargetChannel_(normalChannelId) {
+  if (DEBUG_ON) {
+    return SLACK_CHANNEL_DEBUGGING;
+  }
+  return normalChannelId;
+}
+
+/**
+ * SlackCharts_NewAPI.gs
+ *
+ * Uses Slack's new external upload API to send Google Sheets charts to channels.
+ *
+ * EXPECTS these global constants to exist in other files:
+ *   const slackBotToken = 'xoxb-...';
+ *   const SLACK_CHANNEL_GOALS;
+ *   const SLACK_CHANNEL_1ST_F_FITNESS;
+ *   const SLACK_CHANNEL_THE_REDZONE;
+ *   // (optional) const SLACK_CHANNEL_DEBUGGING;
+ */
+
+// ----------------- Internal helpers -----------------
+
+/**
+ * Helper to find a chart by its title on the "Charts" sheet.
+ *
+ * @param {string} title
+ * @return {EmbeddedChart}
+ */
+function getChartByTitle_(title) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName('Charts');
+  if (!sheet) {
+    throw new Error("Sheet named 'Charts' not found.");
+  }
+
+  const chart = sheet
+    .getCharts()
+    .find((c) => c.getOptions().get('title') === title);
+
+  if (!chart) {
+    throw new Error(
+      "Cannot find chart titled '" + title + "' in the 'Charts' sheet."
+    );
+  }
+
+  return chart;
+}
+
+/**
+ * Uploads a PNG blob to Slack using the new external upload flow:
+ *   1) files.getUploadURLExternal
+ *   2) POST binary to upload_url
+ *   3) files.completeUploadExternal
+ *
+ * @param {Blob}   blob       PNG image blob from chart.getAs('image/png')
+ * @param {string} title      Title for the file in Slack
+ * @param {string} channelId  Slack channel ID (e.g. 'C03SC7HLN66')
+ */
+function uploadChartBlobToSlack_(blob, title, channelId) {
+  if (typeof slackBotToken === 'undefined' || !slackBotToken) {
+    throw new Error('slackBotToken is not defined.');
+  }
+
+  const bytes = blob.getBytes();
+  const length = bytes.length;
+  const filename = title + '.png';
+
+  // --- DEBUG: log what we're about to send ---
+  console.log('Preparing upload: filename =', filename, 'length =', length);
+
+  // 1) Get upload URL & file_id
+  const getUrlResp = UrlFetchApp.fetch(
+    'https://slack.com/api/files.getUploadURLExternal',
+    {
+      method: 'post',
+      headers: {
+        Authorization: 'Bearer ' + slackBotToken,
+        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+      },
+      payload: {
+        filename: filename,
+        length: String(length), // Slack expects a string in form-encoded body
+      },
+      muteHttpExceptions: true,
+    }
+  );
+
+  const status = getUrlResp.getResponseCode();
+  const text = getUrlResp.getContentText();
+
+  console.log('getUploadURLExternal status =', status);
+  console.log('getUploadURLExternal body   =', text);
+
+  if (status !== 200) {
+    throw new Error(
+      'Slack files.getUploadURLExternal HTTP ' + status + ': ' + text
+    );
+  }
+
+  const getUrlBody = JSON.parse(text);
+  if (!getUrlBody.ok) {
+    const meta = getUrlBody.response_metadata
+      ? ' meta=' + JSON.stringify(getUrlBody.response_metadata)
+      : '';
+    throw new Error(
+      'Slack files.getUploadURLExternal error: ' +
+        getUrlBody.error +
+        meta
+    );
+  }
+
+  const uploadUrl = getUrlBody.upload_url;
+  const fileId = getUrlBody.file_id;
+
+  // 2) Upload file data (binary POST to upload_url)
+  const uploadResp = UrlFetchApp.fetch(uploadUrl, {
+    method: 'post', // Slack docs show POST here
+    contentType: 'application/octet-stream',
+    payload: bytes,
+    muteHttpExceptions: true,
+  });
+
+  console.log('upload POST status =', uploadResp.getResponseCode());
+  console.log('upload POST body   =', uploadResp.getContentText());
+
+  if (uploadResp.getResponseCode() >= 400) {
+    throw new Error(
+      'Error uploading file data to Slack upload URL: HTTP ' +
+        uploadResp.getResponseCode() +
+        ' ' +
+        uploadResp.getContentText()
+    );
+  }
+
+  // 3) Complete the upload & share to the specified channel
+  const completeResp = UrlFetchApp.fetch(
+    'https://slack.com/api/files.completeUploadExternal',
+    {
+      method: 'post',
+      headers: {
+        Authorization: 'Bearer ' + slackBotToken,
+        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+      },
+      payload: {
+        // form-encoded, per Slack docs
+        files: JSON.stringify([{ id: fileId, title: title }]),
+        channel_id: channelId,
+        initial_comment: title,
+      },
+      muteHttpExceptions: true,
+    }
+  );
+
+  console.log('completeUploadExternal status =', completeResp.getResponseCode());
+  console.log('completeUploadExternal body   =', completeResp.getContentText());
+
+  if (completeResp.getResponseCode() !== 200) {
+    throw new Error(
+      'Slack files.completeUploadExternal HTTP ' +
+        completeResp.getResponseCode() +
+        ': ' +
+        completeResp.getContentText()
+    );
+  }
+
+  const completeBody = JSON.parse(completeResp.getContentText());
+  if (!completeBody.ok) {
+    const meta2 = completeBody.response_metadata
+      ? ' meta=' + JSON.stringify(completeBody.response_metadata)
+      : '';
+    throw new Error(
+      'Slack files.completeUploadExternal error: ' +
+        completeBody.error +
+        meta2
+    );
+  }
+}
+
+// ----------------- Public functions (same names as before) -----------------
+
+/**
+ * Sends "Unique PAX across the Region, per Week" chart to the goals channel.
+ */
+function senduniquePAXPerWeek() {
+  const chart = getChartByTitle_(uniquePAXPerWeek);
+  const blob = chart.getAs('image/png');
+  const channelId = getTargetChannel_(SLACK_CHANNEL_GOALS);
+
+  uploadChartBlobToSlack_(blob, uniquePAXPerWeek, channelId);
+}  
+
+/**
+ * Sends "Average pax per AO, per Month" chart to the goals channel.
+ */
+function sendAveragePAXPerAOChart() {
+  const chart = getChartByTitle_(averagePAXPerAO);
+  const blob = chart.getAs('image/png');
+  const channelId = getTargetChannel_(SLACK_CHANNEL_GOALS);
+  uploadChartBlobToSlack_(blob, averagePAXPerAO, channelId);
+
+}
+
+/**
+ * Sends Beatdowns total chart to #1st-f-fitness (or whatever channel you choose).
+ */
+function sendBeatdownChartToSlack() {
+  const chart = getChartByTitle_(beatdowntotal);
+  const blob = chart.getAs('image/png');
+  const channelId = getTargetChannel_(SLACK_CHANNEL_1ST_F_FITNESS);
+
+  uploadChartBlobToSlack_(blob, beatdowntotal, channelId);
+}
+
+/**
+ * Sends Redzone chart to #the_redzone.
+ */
+function sendRedZoneChartToSlack() {
+  const chart = getChartByTitle_(redzonetotal);
+  const blob = chart.getAs('image/png');
+  const channelId = getTargetChannel_(SLACK_CHANNEL_THE_REDZONE);
+
+  uploadChartBlobToSlack_(blob, redzonetotal, channelId);
+}
+const SLACK_WEBHOOK_URL = PropertiesService.getScriptProperties().getProperty('KOG_WEBHOOK_URL');
+
+const KOG_DATA_BRANCH = 'main';
+
+const KOG_SCORING_URL = 'https://f3theunion.com/kog/scoring.html'
+/* ---------- scoring window ---------- */
+
+  KOG_START_DATE = new Date('2026-01-05'); // Monday
+  KOG_START_DATE.setHours(0, 0, 0, 0);
+
+  const KOG_END_DATE = (() => {
+    const d = new Date('2026-02-15');
+    d.setHours(23, 59, 59, 999);
+    return d;
+  })();
+
+const KOG_SCORE_ADJUSTMENTS = [
+  { week: '2026-01-26', pax: 'House Arrest',  delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Biden',         delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Rugrat',        delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Peach',         delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Sprocket',      delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Barf',          delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Shrink',        delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'BigRig',        delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Hobo',          delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Puppy mill',    delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Charlotte',     delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Village people',delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Poindexter',    delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Heidi',         delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Ricky Bobby',   delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'After Market',  delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Cabana Boy',    delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Alice',         delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Play Date',     delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'Ocho',          delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-01-26', pax: 'BodyPump',      delta: 2, reason: '+2 M Convo Bonus' },
+  { week: '2026-02-09', pax: 'BodyPump',      delta: 1, reason: '+1 kotter Mouserat' },
+  { week: '2026-02-09', pax: 'BodyPump',      delta: 1, reason: '+1 kotter Oakland' },
+  { week: '2026-02-09', pax: 'BodyPump',      delta: 1, reason: '+1 kotter Spikeball' },
+  { week: '2026-02-09', pax: 'After Market',  delta: 1, reason: '+1 kotter Epi'    },
+  { week: '2026-02-09', pax: 'After Market',  delta: 1, reason: '+1 kotter Bubbles'    },
+  { week: '2026-02-09', pax: 'Sprocket',      delta: 1, reason: '+1 kotter Haymaze'},
+  { week: '2026-02-09', pax: 'Sprocket',      delta: 1, reason: '+1 kotter Tippy'},
+  { week: '2026-02-09', pax: 'Hobo',          delta: 1, reason: '+1 kotter harbaugh 3-5'},
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter Geo'    },
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter McStuffins' },
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter Baywatch' },
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter Scrappy'},
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter Jigglypuff' },
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter Vixen' },
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter Basketcase' },
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter Pucker' },
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter Turtle dove' },
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter Cousin Eddy' },
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter Kit Kat' },
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter Bernie' },
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter Deuce' },
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter Soft tissue' },
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter JenAy' },
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 kotter Deep dish' },
+  { week: '2026-02-09', pax: 'Peach',         delta: 1, reason: '+1 kotter Eleanor'},
+  { week: '2026-02-09', pax: 'House Arrest',  delta: 1, reason: '+1 OOT AO the_farm 2/11'},
+  { week: '2026-02-09', pax: 'Village people',delta: 1, reason: '+1 OOT AO the_yard 2/13'},
+  { week: '2026-02-09', pax: 'Sprocket',      delta: 1, reason: '+1 OOT AO the_yard 2/13'},
+  { week: '2026-02-09', pax: 'Puppy mill',    delta: 1, reason: '+1 OOT AO the_yard 2/13'},
+  { week: '2026-02-09', pax: 'Foghorn'       ,delta: 1, reason: '+1 OOT AO the_show 2/10'},
+  { week: '2026-02-09', pax: 'Hobo'          ,delta: 1, reason: '+1 OOT AO the_show 2/10'},
+  { week: '2026-02-09', pax: 'BigRig'        ,delta: 1, reason: '+1 OOT AO the_plant 2/14'},
+  { week: '2026-02-09', pax: 'Heidi'         ,delta: 1, reason: '+1 OOT AO the_plant 2/14'},
+  { week: '2026-02-09', pax: 'Rugrat'        ,delta: 1, reason: '+1 OOT AO the_plant 2/14'},
+  { week: '2026-02-09', pax: 'Poindexter'    ,delta: 1, reason: '+1 OOT AO the_plant 2/14'},
+  { week: '2026-02-09', pax: 'Peach'         ,delta: 1, reason: '+1 OOT AO 2/11'         },
+  { week: '2026-02-09', pax: 'Alice'         ,delta: 1, reason: '+1 OOT AO the_show 2/12'},
+  { week: '2026-02-09', pax: 'Charlotte'     ,delta: 1, reason: '+1 OOT AO 2/11'         },
+  { week: '2026-02-09', pax: 'BodyPump'      ,delta: 1, reason: '+1 OOT AO #the_rock'    },
+];
+
+function regenScores() {
+  buildFactPaxEvents();
+  applyWeeklyCaps();
+  generatePaxWeeklyScores();
+  generateTeamScores();
+
+  const kogfiles = {
+    'data/team_cumulative.json': sheetToJSON('Score_TeamCumulative'),
+    'data/team_weekly.json': sheetToJSON('Score_TeamWeekly'),
+    'data/pax_weekly.json': sheetToJSON('Score_PaxWeekly_Summary'),
+    'data/pax_events.json': sheetToJSON('Fact_PaxEvents'),
+    'data/meta.json': buildKoGMeta()
+  };
+
+  commitFilesToGitHubSingleCommit(KOG_DATA_BRANCH, 'KoG regen scoring update', kogfiles);
+}
+
+function nightlyKoGRun() {
+  getpaxmetrics();            // your existing loader
+  regenScores();
+  sendKoGSlackUpdate();
+}
+
+function fmtWeek(v) {
+  return Utilities.formatDate(
+    new Date(v),
+    Session.getScriptTimeZone(),
+    'yyyy-MM-dd'
+  );
+}
+
+function isOutsideKog(week) {
+  return new Date(week) < KOG_START_DATE || new Date(week) > KOG_END_DATE;
+}
+
+function generateTeamScores() {
+  const ss = SpreadsheetApp.getActive();
+  const paxWeekly = ss.getSheetByName('Score_PaxWeekly_Summary');
+
+  const data = paxWeekly.getRange(
+    2, 1,
+    paxWeekly.getLastRow() - 1,
+    paxWeekly.getLastColumn()
+  ).getValues();
+
+  /* ---------- TEAM WEEKLY ---------- */
+
+  let teamWeekly = ss.getSheetByName('Score_TeamWeekly');
+  if (!teamWeekly) teamWeekly = ss.insertSheet('Score_TeamWeekly');
+  teamWeekly.clearContents();
+
+  const weeklyMap = {};
+
+  data.forEach(([week, pax, team, raw, score]) => {
+    if (isOutsideKog(week)) return;
+
+    const key = week + '|' + team;
+    if (!weeklyMap[key]) {
+      weeklyMap[key] = { week, team, total: 0, count: 0 };
+    }
+    weeklyMap[key].total += score;
+    weeklyMap[key].count++;
+  });
+
+  const weeklyRows = [['WeekStart', 'Team', 'AvgScore']];
+
+  Object.values(weeklyMap).forEach(o => {
+    weeklyRows.push([
+      o.week,
+      o.team,
+      Math.round(o.total / o.count)
+    ]);
+  });
+
+  teamWeekly.getRange(
+    1, 1,
+    weeklyRows.length,
+    weeklyRows[0].length
+  ).setValues(weeklyRows);
+
+  teamWeekly.autoResizeColumns(1, weeklyRows[0].length);
+
+  /* ---------- TEAM CUMULATIVE ---------- */
+
+  let teamTotal = ss.getSheetByName('Score_TeamCumulative');
+  if (!teamTotal) teamTotal = ss.insertSheet('Score_TeamCumulative');
+  teamTotal.clearContents();
+
+  const totalMap = {};
+
+  data.forEach(([week, pax, team, raw, score]) => {
+    if (isOutsideKog(week)) return;
+
+    if (!totalMap[team]) {
+      totalMap[team] = { total: 0, count: 0 };
+    }
+    totalMap[team].total += score;
+    totalMap[team].count++;
+  });
+
+  const totalRows = [['Team', 'AvgScore']];
+
+  Object.entries(totalMap).forEach(([team, o]) => {
+    totalRows.push([
+      team,
+      Math.round(o.total / o.count)
+    ]);
+  });
+
+  teamTotal.getRange(
+    1, 1,
+    totalRows.length,
+    totalRows[0].length
+  ).setValues(totalRows);
+
+  teamTotal.autoResizeColumns(1, totalRows[0].length);
+}
+//end generateTeamsScores
+function generatePaxWeeklyScores() {
+  const ss = SpreadsheetApp.getActive();
+  const fact = ss.getSheetByName('Fact_PaxEvents');
+
+  let out = ss.getSheetByName('Score_PaxWeekly_Summary');
+  if (!out) out = ss.insertSheet('Score_PaxWeekly_Summary');
+  out.clearContents();
+
+  const data = fact.getRange(2, 1, fact.getLastRow() - 1, 7).getValues();
+  const map = {};
+
+  data.forEach(r => {
+    if (!r[5]) return; // Counted only
+
+    const week = r[1];
+    if (isOutsideKog(week)) return;
+
+    const pax = r[2];
+    const team = r[3];
+
+    const key = week + '|' + pax;
+    if (!map[key]) {
+      map[key] = { week, pax, team, raw: 0 };
+    }
+    if (r[4] && r[4].toLowerCase() === 'kog_bonus') {
+      const bonus = parseInt(r[6], 10) || 0;
+      map[key].raw += bonus;
+    } else {
+      map[key].raw += 1;
+    }
+  });
+
+  const rows = [[ 'WeekStart', 'Pax', 'Team', 'Raw', 'Score' ]];
+
+  // build base rows
+  Object.values(map).forEach(o => {
+    rows.push([
+      o.week,
+      o.pax,
+      o.team,
+      o.raw,
+      Math.round((o.raw / 3) * 100)
+    ]);
+  });
+
+  out.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
+  out.autoResizeColumns(1, rows[0].length);
+
+  addMissingPaxToWeeklyScores();
+}
+//generatePAXWeeklyscores
+
+function addMissingPaxToWeeklyScores() {
+  const ss = SpreadsheetApp.getActive();
+
+  const scoreSheet = ss.getSheetByName('Score_PaxWeekly_Summary');
+  const mapSheet = ss.getSheetByName('26KoGScoring');
+
+  const scoreData = scoreSheet
+    .getRange(2, 1, scoreSheet.getLastRow() - 1, 5)
+    .getValues();
+
+  const tz = Session.getScriptTimeZone();
+
+  // normalize WeekStart to yyyy-MM-dd
+  const fmtWeek = v =>
+    Utilities.formatDate(new Date(v), tz, 'yyyy-MM-dd');
+
+  // existing Week|Pax keys
+  const existing = new Set(
+    scoreData.map(r => `${fmtWeek(r[0])}|${r[1]}`)
+  );
+
+  // distinct weeks (normalized)
+  const weeks = [...new Set(scoreData.map(r => fmtWeek(r[0])))];
+
+  // pax → team map
+  const paxTeam = {};
+  mapSheet.getRange(2, 1, mapSheet.getLastRow() - 1, 2)
+    .getValues()
+    .forEach(([team, pax]) => {
+      if (pax) paxTeam[pax] = team;
+    });
+
+  const rowsToAdd = [];
+
+  weeks.forEach(week => {
+    Object.entries(paxTeam).forEach(([pax, team]) => {
+      const key = `${week}|${pax}`;
+      if (!existing.has(key)) {
+        rowsToAdd.push([
+          week,  // normalized WeekStart
+          pax,
+          team,
+          0,     // Raw
+          0      // Score
+        ]);
+      }
+    });
+  });
+
+  if (rowsToAdd.length) {
+    scoreSheet
+      .getRange(scoreSheet.getLastRow() + 1, 1, rowsToAdd.length, 5)
+      .setValues(rowsToAdd);
+  }
+}
+//addmissingpax
+function applyWeeklyCaps() {
+  const ss = SpreadsheetApp.getActive();
+  const sheet = ss.getSheetByName('Fact_PaxEvents');
+
+  const dataRange = sheet.getRange(2, 1, sheet.getLastRow() - 1, 7);
+  const data = dataRange.getValues();
+
+  /* ---------- reset flags (safe rerun) ---------- */
+
+  data.forEach(r => {
+    r[5] = true;
+    if (r[4].toLowerCase() !== 'kog_bonus') {
+      r[6] = '';
+    }
+  });
+
+  /* ---------- de-duplicate same Pax + Date + AO ---------- */
+
+  const seen = new Set();
+
+  data.forEach(r => {
+
+    // Skip KOG_BONUS rows entirely
+    if ((r[4] ?? '').toString().trim().toUpperCase() === 'KOG_BONUS') {
+      return;
+    }
+
+    const dateKey = Utilities.formatDate(
+      new Date(r[0]),
+      Session.getScriptTimeZone(),
+      'yyyy-MM-dd'
+    );
+
+    const pax = r[2];
+    const ao = r[4].toLowerCase();  // keep EXACTLY as before
+
+    const key = `${dateKey}|${pax}|${ao}`;
+
+    if (seen.has(key)) {
+      r[5] = false;
+      r[6] = 'Duplicate same-day';
+    } else {
+      seen.add(key);
+    }
+  });
+
+  /* ---------- group ONLY counted rows by WeekStart + Pax ---------- */
+
+  const groups = {};
+
+  data.forEach(r => {
+    if (!r[5]) return;
+    const key = `${r[1]}|${r[2]}`;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(r);
+  });
+
+  /* ---------- apply weekly caps ---------- */
+
+  Object.values(groups).forEach(group => {
+    const beatdowns = [];
+    const extras = [];
+
+    group.forEach(r => {
+      const ao = r[4].toLowerCase();
+      
+      if (ao === 'kog_bonus' || ao === 'fng') return;
+
+      if (ao === 'prework') {
+        extras.push(r);
+      } else {
+        beatdowns.push(r);
+      }
+    });
+
+    beatdowns
+      .sort((a, b) => new Date(a[0]) - new Date(b[0]))
+      .slice(3)
+      .forEach(r => {
+        r[5] = false;
+        r[6] = 'Beatdowns capped at 3';
+      });
+
+    extras
+      .sort((a, b) => new Date(a[0]) - new Date(b[0]))
+      .slice(2)
+      .forEach(r => {
+        r[5] = false;
+        r[6] = 'Extra Credit Capped at 2';
+      });
+  });
+
+  dataRange.setValues(data);
+}
+//applyWeeklyCaps end
+
+function buildFactPaxEvents() {
+  const ss = SpreadsheetApp.getActive();
+
+  const paxSheet = ss.getSheetByName('pax');
+  const kogSheet = ss.getSheetByName('26KoG');
+  const mapSheet = ss.getSheetByName('26KoGScoring');
+
+  let out = ss.getSheetByName('Fact_PaxEvents');
+  if (!out) out = ss.insertSheet('Fact_PaxEvents');
+  out.clearContents();
+
+  /* ---------- helpers ---------- */
+
+  const weekStart = d => {
+    const dt = new Date(d);
+    dt.setHours(0, 0, 0, 0);
+    dt.setDate(dt.getDate() - ((dt.getDay() + 6) % 7));
+    return Utilities.formatDate(
+      dt,
+      Session.getScriptTimeZone(),
+      'yyyy-MM-dd'
+    );
+  };
+
+  /* ---------- pax → team map ---------- */
+
+  const paxTeam = {};
+  mapSheet
+    .getRange(2, 1, mapSheet.getLastRow() - 1, 2)
+    .getValues()
+    .forEach(([team, pax]) => {
+      if (pax) paxTeam[pax] = { pax, team };
+    });
+
+  const rows = [[
+    'Date', 'WeekStart', 'Pax', 'Team', 'AO', 'Counted', 'Reason'
+  ]];
+
+/* ---------- beatdowns (pax sheet) ---------- */
+
+paxSheet
+  .getRange(2, 1, paxSheet.getLastRow() - 1, 3)
+  .getValues()
+  .forEach(([date, ao, pax]) => {
+    if (!date || !ao || !pax) return;
+    if (isOutsideKog(date)) return;
+    if (!paxTeam[pax]) return;
+
+    rows.push([
+      date,
+      weekStart(date),
+      paxTeam[pax].pax,
+      paxTeam[pax].team,
+      ao,
+      true,
+      ''
+    ]);
+  });
+  /* ---------- 26KoG events (BO / PW / FNG) ---------- */
+
+  const headers = kogSheet
+    .getRange(1, 4, 1, kogSheet.getLastColumn() - 3)
+    .getValues()[0];
+
+  const dates = kogSheet
+  .getRange(2, 2, kogSheet.getLastRow() - 1, 1) // ✅ column B
+  .getValues();
+
+  const data = kogSheet
+    .getRange(2, 4, kogSheet.getLastRow() - 1, headers.length)
+    .getValues();
+
+  dates.forEach((r, i) => {
+    const date = r[0];
+    if (!date) return;
+    if (isOutsideKog(date)) return;
+
+  data[i].forEach((v, c) => {
+    if (!v) return;
+
+    const paxKey = headers[c];
+    if (!paxTeam[paxKey]) return;
+
+    // Split "PreWork, BlackOps" into separate events
+    const events = String(v)
+      .split(',')
+      .map(e => e.trim())
+      .filter(Boolean);
+
+    events.forEach(event => {
+      rows.push([
+        date,
+        weekStart(date),
+        paxTeam[paxKey].pax,
+        paxTeam[paxKey].team,
+        event,
+        true,
+        ''
+      ]);
+    });
+  });
+
+});
+
+/* ---------- KOG score adjustments as synthetic events ---------- */
+
+KOG_SCORE_ADJUSTMENTS.forEach(adj => {
+  if (isOutsideKog(adj.week)) return;
+
+  const eventDate = new Date(adj.week);
+  eventDate.setHours(0,0,0,0);
+
+  rows.push([
+    adj.week,
+    adj.week,                 // WeekStart
+    adj.pax,
+    paxTeam[adj.pax]?.team || '',
+    'KOG_BONUS',
+    true,
+    adj.reason || 'Manual bonus'
+  ]);
+});
+
+  out.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
+  out.autoResizeColumns(1, rows[0].length);
+}
+//end buildFactpaxevents
+
+function buildKoGScoringGrid() {
+  const ss = SpreadsheetApp.getActive();
+  const sheet = ss.getSheetByName('26KoGScoring');
+  sheet.clearContents();
+
+  const data = [
+    // Extras
+    ['Extras', 'Barf'],
+    ['Extras', 'Vagabond'],
+    ['Extras', 'Soccermom'],
+    ['Extras', 'Uniball'],
+    ['Extras', 'Midriff'],
+    ['Extras', 'Goosebumps'],
+    ['Extras', 'Dewey'],
+
+    // Farm
+    ['Farm', 'Piddle'],
+    ['Farm', 'Quaker'],
+    ['Farm', 'Iceberg'],
+    ['Farm', 'Knievil'],
+    ['Farm', 'Dufresne'],
+    ['Farm', 'Popup'],
+
+    // Factory
+    ['Factory', 'Cabana Boy'],
+    ['Factory', 'Charlotte'],
+    ['Factory', 'Shrink'],
+    ['Factory', 'Biden'],
+    ['Factory', 'Bluey'],
+
+    // Clocktower
+    ['Clocktower', 'Peach'],
+    ['Clocktower', 'Village People'],
+    ['Clocktower', 'Rugrat'],
+    ['Clocktower', 'Poindexter'],
+    ['Clocktower', 'Heidi'],
+    ['Clocktower', 'Body Pump'],
+    ['Clocktower', 'Alice'],
+
+    // Redzone
+    ['Redzone', 'Ocho'],
+    ['Redzone', 'Playdate'],
+    ['Redzone', 'Dodo'],
+    ['Redzone', 'Beaker'],
+    ['Redzone', 'Pitch Perfect'],
+    ['Redzone', 'FogHorn'],
+
+    // Richwood
+    ['Richwood', 'Bumblebee'],
+    ['Richwood', 'Coffin'],
+    ['Richwood', 'Ricky Bobby'],
+    ['Richwood', 'Ball Valve'],
+    ['Richwood', 'Jelly Roll'],
+    ['Richwood', 'Hermey'],
+
+    // Fountain
+    ['Fountain', 'After Market'],
+    ['Fountain', 'Hobo'],
+    ['Fountain', 'House Arrest'],
+    ['Fountain', 'Big Rig'],
+    ['Fountain', 'Puppy Mill'],
+    ['Fountain', 'Sprocket'],
+  ];
+
+  // header
+  sheet.getRange(1, 1, 1, 2).setValues([['Team', 'Pax']]);
+
+  // data
+  sheet.getRange(2, 1, data.length, 2).setValues(data);
+
+  sheet.autoResizeColumns(1, 2);
+}
+
+function validateKogHeaders() {
+  const ss = SpreadsheetApp.getActive();
+  const kog = ss.getSheetByName('26KoG');
+  const pax = ss.getSheetByName('pax');
+
+  const paxMap = {};
+  pax.getRange(2, 3, pax.getLastRow() - 1, 1)
+    .getValues()
+    .flat()
+    .filter(String)
+    .forEach(v => {
+      const key = v.toLowerCase().replace(/\s+/g, '');
+      paxMap[key] = v; // store exact pax value
+    });
+
+  const lastCol = kog.getLastColumn();
+  const headerRange = kog.getRange(1, 4, 1, lastCol - 3);
+  const headers = headerRange.getValues()[0];
+
+  const newHeaders = [];
+  const backgrounds = [];
+
+  headers.forEach(h => {
+    if (!h) {
+      newHeaders.push('');
+      backgrounds.push('');
+      return;
+    }
+
+    const key = h.toLowerCase().replace(/\s+/g, '');
+
+    if (paxMap[key]) {
+      newHeaders.push(paxMap[key]); // exact pax value
+      backgrounds.push('');
+    } else {
+      newHeaders.push(h);
+      backgrounds.push('#ffff00');
+    }
+  });
+
+  headerRange.setValues([newHeaders]);
+  headerRange.setBackgrounds([backgrounds]);
+}
+/////////////////after this is stuff for publising to web////////////////////
+
+function buildKoGMeta() {
+  return {
+    generatedAt: Utilities.formatDate(
+      new Date(),
+      Session.getScriptTimeZone(),
+      "yyyy-MM-dd'T'HH:mm:ssXXX"
+    ),
+    seasonStart: '2026-01-05',
+    seasonEnd: '2026-02-15'
+  };
+}
+
+function sendKoGSlackUpdate() {
+  const ss = SpreadsheetApp.getActive();
+  const sheet = ss.getSheetByName('Score_TeamCumulative');
+
+  const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 2).getValues();
+
+  // sort DESC by score
+  data.sort((a, b) => b[1] - a[1]);
+
+  const today = Utilities.formatDate(
+    new Date(),
+    Session.getScriptTimeZone(),
+    'yyyy-MM-dd'
+  );
+
+  let text = `🏆 *Kings of the Gloom – Nightly Update (${today})*\n\n`;
+
+  data.forEach((r, i) => {
+    text += `${i + 1}. *${r[0]}* – ${r[1]}%\n`;
+  });
+
+  text += `\nFull details:\n${KOG_SCORING_URL}`;
+
+  const payload = {
+    text
+  };
+
+  UrlFetchApp.fetch(SLACK_WEBHOOK_URL, {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify(payload)
+  });
+}
+const BQ_PROJECT_ID = 'f3data';
+const EXCLUDED_PAX = [];
+
+function doAllMetrics() {
+  getPaxMetricsBQ();
+  getRZMetricsBQ();
+  getAOAvgAttendanceBQ();
+  getBDAttendanceBQ();
+  getUniquePaxCountBQ();
+  getQReportRollingBQJsonToGitHub();
+  exportNeverQDataToGitHub();
+}
+
+/**
+ * Convert runBigQuery() headers + rows into JSON objects.
+ */
+function rowsToObjects(headers, rows) {
+  return rows.map(function(row) {
+    const obj = {};
+
+    headers.forEach(function(header, i) {
+      let value = row[i];
+
+      if (header === 'attended_since_last_q') {
+        value = Number(value || 0);
+      }
+
+      obj[header] = value;
+    });
+
+    return obj;
+  });
+}
+
+function toDateKey(value) {
+  if (Object.prototype.toString.call(value) === '[object Date]') {
+    return Utilities.formatDate(value, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  }
+  return String(value).substring(0, 10);
+}
+/**
+ * Run a BigQuery query and return headers + rows
+ */
+function runBigQuery(query) {
+  const request = {
+    query: query,
+    useLegacySql: false
+  };
+
+  let result = BigQuery.Jobs.query(request, BQ_PROJECT_ID);
+  const jobId = result.jobReference.jobId;
+
+  // wait for completion
+  while (!result.jobComplete) {
+    Utilities.sleep(500);
+    result = BigQuery.Jobs.getQueryResults(BQ_PROJECT_ID, jobId);
+  }
+
+  const headers = result.schema.fields.map(f => f.name);
+  const rows = [];
+
+  let pageToken = null;
+  do {
+    const page = pageToken
+      ? BigQuery.Jobs.getQueryResults(BQ_PROJECT_ID, jobId, { pageToken })
+      : result;
+
+    (page.rows || []).forEach(r => {
+      rows.push(r.f.map(c => c.v));
+    });
+
+    pageToken = page.pageToken;
+  } while (pageToken);
+
+  return { headers, rows };
+}
+
+/**
+ * Write results to a sheet
+ */
+function writeToSheet(sheetName, headers, rows) {
+  const ss = SpreadsheetApp.getActive();
+  const sheet = ss.getSheetByName(sheetName) || ss.insertSheet(sheetName);
+
+  sheet.clearContents();
+
+  const output = [headers, ...rows];
+
+  if (output.length > 0) {
+    sheet.getRange(1, 1, output.length, output[0].length).setValues(output);
+    sheet.autoResizeColumns(1, output[0].length);
+  }
+
+  return sheet;
+}
+
+/**
+ * Replacement for getpaxmetrics()
+ */
+function getPaxMetricsBQ() {
+
+const excludeClause = EXCLUDED_PAX.length
+  ? "AND a.f3_name NOT IN (" + EXCLUDED_PAX.map(n => "'" + n + "'").join(',') + ") "
+  : "";
+
+const sql =
+"SELECT " +
+"  a.start_date AS Date, " +
+"  e.ao_name AS AO, " +
+"  a.f3_name AS PAX, " +
+"  COUNT(*) OVER (PARTITION BY a.user_id) AS BEATDOWNS " +
+"FROM `f3data.analytics.attendance_info` a " +
+"LEFT JOIN `f3data.analytics.event_info` e " +
+"  ON a.event_instance_id = e.id " +
+"WHERE a.start_date >= DATE '2026-01-01' " +
+"  AND a.start_date <= DATE '2026-12-31' " +
+"  AND ((e.ao_name IN ('The Fountain','The Farm','The Plant','The Clocktower','The Yard','The Factory','The Floor','The Redzone','The Show','The Dock','the_downrange') " +
+"  AND CAST(region_org_id AS STRING) = '38363') " +
+"   or (a.home_region_id = 38363 and region_org_id <> 38363)) "
++ excludeClause +
+"QUALIFY COUNT(*) OVER (PARTITION BY a.user_id) >= 10 " +
+"ORDER BY 4 DESC, 3 ASC";
+
+  Logger.log(sql);
+  const result = runBigQuery(sql);
+  const sheet = writeToSheet('pax', result.headers, result.rows);
+
+  // ---- replicate your append + sort logic ----
+  appendAndResortBQ(sheet);
+}
+
+function getRZMetricsBQ() {
+const sql = 
+"SELECT a.f3_name AS PAX, COUNT(*) AS BEATDOWNS FROM `f3data.analytics.attendance_info` a LEFT JOIN `f3data.analytics.event_info` e " +
+"  ON a.event_instance_id = e.id " +
+"WHERE a.start_date >= DATE '2026-01-01' " +
+"  AND a.start_date <= DATE '2026-12-31' " +
+"  AND e.ao_name IN ('The Redzone') " +
+"  AND CAST(e.region_org_id AS STRING) = '38363' " +
+" Group by a.f3_name " +
+" order by 2 desc,1 ";
+
+  Logger.log(sql);
+  const result = runBigQuery(sql);
+  const sheet = writeToSheet('redzone', result.headers, result.rows);
+
+}
+
+/**
+ * Port of your append + sort logic
+ */
+function appendAndResortBQ(sheet) {
+
+  const lastRowAD = sheet.getRange('A:A').getLastRow();
+
+  const src = sheet
+    .getRange(2, 7, sheet.getLastRow() - 1, 4)
+    .getValues()
+    .filter(r => r.some(v => v !== ''));
+
+  if (src.length === 0) return;
+
+  sheet.getRange(lastRowAD + 1, 1, src.length, 4).setValues(src);
+
+  sheet.getRange(2, 1, lastRowAD + src.length - 1, 4)
+    .sort([
+      { column: 4, ascending: false },
+      { column: 3, ascending: true }
+    ]);
+}
+
+function getAOAvgAttendanceBQ() {
+
+const sql =
+  "SELECT " +
+  "  FORMAT_DATE('%m (%b)', DATE_TRUNC(start_date, MONTH)) AS bd_month, " +
+  "  ao_name AS ao, " +
+  "  ROUND(AVG(pax_count), 1) AS avg_pax " +
+  "FROM `f3data.analytics.event_info` " +
+  "WHERE start_date >= DATE_SUB(DATE_TRUNC(CURRENT_DATE(), MONTH), INTERVAL 2 MONTH) " +
+  "  AND CAST(region_org_id AS STRING) = '38363' " +
+  "  AND ao_name IS NOT NULL " +
+  "  AND ao_name NOT IN ('2nd F','Farm Bible Preruck','BTown Y Ruck','BlackOps','BTown Y Book Study','the_downrange') " +
+  "GROUP BY bd_month, ao_name";
+
+  const result = runBigQuery(sql);
+  writeToSheet('ao_avg', result.headers, result.rows);
+}
+
+function getBDAttendanceBQ() {
+  const sql =
+    "SELECT " +
+    "  start_date AS date, " +
+    "  SUM(pax_count) AS pax_count " +
+    "FROM `f3data.analytics.event_info` " +
+    "WHERE start_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 WEEK) " +
+    "  AND CAST(region_org_id AS STRING) = '38363' " +
+    "GROUP BY start_date " +
+    "ORDER BY start_date DESC";
+
+  const result = runBigQuery(sql);
+  const sheet = writeToSheet('bd_attendance', result.headers, result.rows);
+
+  // format date column as MM-dd
+  if (sheet.getLastRow() > 1) {
+    sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).setNumberFormat("M-dd");
+  }
+
+  // increment counts from pax!G:G -- for non slack users
+  const ss = SpreadsheetApp.getActive();
+  const paxSheet = ss.getSheetByName('pax');
+
+  const paxLastRow = paxSheet.getLastRow();
+  if (paxLastRow < 2) return;
+
+  const paxDates = paxSheet.getRange(2, 7, paxLastRow - 1, 1)
+    .getValues()
+    .flat()
+    .filter(String)
+    .map(function (d) {
+      return normalizeSheetDate(d);
+    });
+
+  const bdLastRow = sheet.getLastRow();
+  if (bdLastRow < 2) return;
+
+  const bdRange = sheet.getRange(2, 1, bdLastRow - 1, 2);
+  const bdData = bdRange.getValues();
+
+  const dateMap = {};
+  bdData.forEach(function (r, i) {
+    dateMap[normalizeSheetDate(r[0])] = i;
+  });
+
+  paxDates.forEach(function (d) {
+    if (dateMap[d] !== undefined) {
+      bdData[dateMap[d]][1] = Number(bdData[dateMap[d]][1] || 0) + 1;
+    }
+  });
+
+  bdRange.setValues(bdData);
+
+  // re-apply format after writing updated values
+  if (sheet.getLastRow() > 1) {
+    sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).setNumberFormat("M-dd");
+  }
+
+  sheet.autoResizeColumns(1, 2);
+}
+
+function normalizeSheetDate(value) {
+  if (Object.prototype.toString.call(value) === '[object Date]') {
+    return Utilities.formatDate(value, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  }
+  return String(value).substring(0, 10);
+}
+
+function getUniquePaxCountBQ() {
+  const sql =
+    "SELECT " +
+    "  DATE_SUB(a.start_date, INTERVAL EXTRACT(DAYOFWEEK FROM a.start_date) - 1 DAY) AS start_of_week, " +
+    "  COUNT(DISTINCT a.f3_name) AS distinct_pax " +
+    "FROM `f3data.analytics.attendance_info` a " +
+    "WHERE DATE_SUB(a.start_date, INTERVAL EXTRACT(DAYOFWEEK FROM a.start_date) - 1 DAY) >= DATE_SUB(CURRENT_DATE(), INTERVAL 10 WEEK) " +
+    "  AND CAST(a.home_region_id AS STRING) = '38363' " +
+    "GROUP BY start_of_week " +
+    "ORDER BY start_of_week";
+
+  const result = runBigQuery(sql);
+
+  const sheet = SpreadsheetApp.getActive().getSheetByName('distinct_pax');
+  sheet.getRange("A:B").clearContent();
+
+  const output = [result.headers].concat(
+    result.rows.map(function (row) {
+      return [new Date(row[0] + 'T00:00:00'), row[1]];
+    })
+  );
+
+  if (output.length > 0) {
+    sheet.getRange(1, 1, output.length, 2).setValues(output);
+  }
+
+  // display dates as MM-dd
+  if (output.length > 1) {
+    sheet.getRange(2, 1, output.length - 1, 1).setNumberFormat("MM-dd");
+  }
+
+  /* ---- increment from pax! (unique pax per week) ---- */
+
+  const ss = SpreadsheetApp.getActive();
+  const paxSheet = ss.getSheetByName('pax');
+
+  if (paxSheet.getLastRow() < 2 || sheet.getLastRow() < 2) return;
+
+  const paxData = paxSheet
+    .getRange(2, 7, paxSheet.getLastRow() - 1, 2) // G:H (date, pax)
+    .getValues()
+    .filter(function (r) { return r[0] && r[1]; });
+
+  function weekStart(d) {
+    const dt = new Date(d);
+    dt.setHours(0, 0, 0, 0);
+    dt.setDate(dt.getDate() - dt.getDay());
+    return Utilities.formatDate(dt, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  }
+
+  const weeklyPax = new Set();
+  paxData.forEach(function (row) {
+    weeklyPax.add(weekStart(row[0]) + '|' + row[1]);
+  });
+
+  const range = sheet.getRange(2, 1, sheet.getLastRow() - 1, 2);
+  const data = range.getValues();
+
+  const map = {};
+  data.forEach(function (r, i) {
+    map[toDateKey(r[0])] = i;
+  });
+
+  weeklyPax.forEach(function (k) {
+    const wk = k.split('|')[0];
+    if (map[wk] !== undefined) {
+      data[map[wk]][1] = Number(data[map[wk]][1] || 0) + 1;
+    }
+  });
+
+  range.setValues(data);
+  sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).setNumberFormat("MM-dd");
+  sheet.autoResizeColumns(1, 2);
+}
+
+/**
+ * Runs the rolling 60-day Q report and commits it as JSON to GitHub.
+ *
+ * Output file in repo:
+ *   data/q_report_rolling.json
+ */
+function getQReportRollingBQJsonToGitHub() {
+const sql = `
+  WITH base AS (
+    SELECT
+      a.user_id,
+      a.start_date AS attendance_date,
+      e.ao_name AS ao,
+      a.f3_name AS pax,
+      a.q_ind
+    FROM \`f3data.analytics.attendance_info\` a
+    LEFT JOIN \`f3data.analytics.event_info\` e
+      ON a.event_instance_id = e.id
+    WHERE e.region_org_id = 38363
+      AND a.start_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 60 DAY)
+      AND e.ao_name IN (
+        'The Fountain',
+        'The Farm',
+        'The Plant',
+        'The Clocktower',
+        'The Yard',
+        'The Factory',
+        'The Floor',
+        'The Redzone',
+        'The Show',
+        'The Dock'
+      )
+      AND a.user_id IS NOT NULL
+  ),
+
+  pax_list AS (
+    SELECT
+      user_id,
+      ARRAY_AGG(pax IGNORE NULLS ORDER BY attendance_date DESC LIMIT 1)[OFFSET(0)] AS pax
+    FROM base
+    GROUP BY user_id
+  ),
+
+  last_q AS (
+    SELECT
+      user_id,
+      attendance_date AS last_q_date,
+      ao AS last_q_ao
+    FROM base
+    WHERE q_ind = 1
+    QUALIFY ROW_NUMBER() OVER (
+      PARTITION BY user_id
+      ORDER BY attendance_date DESC
+    ) = 1
+  ),
+
+  future_q AS (
+    SELECT
+      planned_q_user_id AS user_id,
+      ao_name AS planned_q_ao,
+      start_date AS planned_q_date
+    FROM \`f3data.analytics.future_event_info\`
+    WHERE region_org_id = 38363
+      AND planned_q_user_id IS NOT NULL
+      AND start_date >= CURRENT_DATE()
+      AND start_date <= DATE_ADD(CURRENT_DATE(), INTERVAL 30 DAY)
+      AND ao_name IN (
+        'The Fountain',
+        'The Farm',
+        'The Plant',
+        'The Clocktower',
+        'The Yard',
+        'The Factory',
+        'The Floor',
+        'The Redzone',
+        'The Show',
+        'The Dock'
+      )
+    QUALIFY ROW_NUMBER() OVER (
+      PARTITION BY planned_q_user_id
+      ORDER BY start_date ASC
+    ) = 1
+  )
+
+  SELECT
+    p.pax,
+    p.user_id,
+    l.last_q_date,
+    l.last_q_ao,
+    f.planned_q_date,
+    f.planned_q_ao,
+    CASE
+      WHEN f.user_id IS NOT NULL THEN 'Future Q Scheduled'
+      WHEN l.last_q_date IS NULL THEN 'Never Q'
+      ELSE 'Has Q'
+    END AS q_status,
+    CASE
+      WHEN f.user_id IS NOT NULL THEN -DATE_DIFF(f.planned_q_date, CURRENT_DATE(), DAY)
+      WHEN l.last_q_date IS NULL THEN COUNT(b.attendance_date)
+      ELSE COUNTIF(b.attendance_date > l.last_q_date)
+    END AS attended_since_last_q
+  FROM pax_list p
+  LEFT JOIN last_q l
+    ON l.user_id = p.user_id
+  LEFT JOIN future_q f
+    ON f.user_id = p.user_id
+  LEFT JOIN base b
+    ON b.user_id = p.user_id
+  GROUP BY
+    p.pax,
+    p.user_id,
+    l.last_q_date,
+    l.last_q_ao,
+    f.user_id,
+    f.planned_q_date,
+    f.planned_q_ao
+  ORDER BY
+    q_status DESC,
+    attended_since_last_q DESC,
+    p.pax
+`;
+
+  const result = runBigQuery(sql);
+  const data = rowsToObjects(result.headers, result.rows);
+
+  const payload = {
+    generated_at: new Date().toISOString(),
+    window_days: 60,
+    region_org_id: 38363,
+    count: data.length,
+    data: data
+  };
+
+  const branch = 'main'; // or your publish branch, such as 'gh-pages'
+  const message = 'Update rolling 60-day Q report';
+
+  commitFilesToGitHubSingleCommit(branch, message, {
+    'data/q_report_rolling.json': payload
+  });
+}
+
+const NEVER_Q_DATA_BRANCH = 'main';
+
+/**
+ * Generates Never Q data using user_id as the unique person key
+ * and commits it to:
+ *   data/never-q.json
+ */
+function exportNeverQDataToGitHub() {
+const sql = `
+  WITH region_attendance AS (
+    SELECT
+      a.user_id,
+      a.start_date AS attendance_date,
+      e.ao_name AS ao,
+      a.f3_name AS pax,
+      a.home_region_id,
+      a.q_ind
+    FROM \`f3data.analytics.attendance_info\` a
+    INNER JOIN \`f3data.analytics.event_info\` e
+      ON a.event_instance_id = e.id
+    WHERE e.region_org_id = 38363
+      AND e.ao_name IN (
+        'The Fountain',
+        'The Farm',
+        'The Plant',
+        'The Clocktower',
+        'The Yard',
+        'The Factory',
+        'The Floor',
+        'The Redzone',
+        'The Show',
+        'The Dock'
+      )
+      AND a.user_id IS NOT NULL
+  ),
+
+  attendance_60 AS (
+    SELECT
+      user_id,
+      COUNT(*) AS bds_attended
+    FROM region_attendance
+    WHERE attendance_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 60 DAY)
+    GROUP BY user_id
+  ),
+
+  last_attendance AS (
+    SELECT
+      user_id,
+      pax,
+      home_region_id,
+      attendance_date AS last_attended_date,
+      ao AS last_attended_ao
+    FROM region_attendance
+    QUALIFY ROW_NUMBER() OVER (
+      PARTITION BY user_id
+      ORDER BY attendance_date DESC
+    ) = 1
+  ),
+
+  has_q AS (
+    SELECT DISTINCT
+      user_id
+    FROM region_attendance
+    WHERE q_ind = 1
+  ),
+
+  future_q AS (
+    SELECT DISTINCT
+      planned_q_user_id AS user_id
+    FROM \`f3data.analytics.future_event_info\`
+    WHERE region_org_id = 38363
+      AND planned_q_user_id IS NOT NULL
+      AND start_date >= CURRENT_DATE()
+  )
+
+  SELECT
+    l.pax,
+    a.user_id,
+    l.home_region_id,
+    a.bds_attended,
+    l.last_attended_date,
+    l.last_attended_ao,
+    'Never Q' AS q_status
+  FROM attendance_60 a
+  LEFT JOIN has_q q
+    ON q.user_id = a.user_id
+  LEFT JOIN future_q f
+    ON f.user_id = a.user_id
+  LEFT JOIN last_attendance l
+    ON l.user_id = a.user_id
+  WHERE q.user_id IS NULL
+    AND f.user_id IS NULL
+  ORDER BY
+    a.bds_attended DESC,
+    l.last_attended_date DESC,
+    l.pax
+`;
+
+  const result = runBigQuery(sql);
+  const data = rowsToNeverQObjects(result.headers, result.rows);
+
+  const payload = {
+    generated_at: new Date().toISOString(),
+    window_days: 60,
+    region_org_id: 38363,
+    report: 'never_q',
+    identity_key: 'user_id',
+    count: data.length,
+    data: data
+  };
+
+  commitFilesToGitHubSingleCommit(
+    NEVER_Q_DATA_BRANCH,
+    'Update never-Q report',
+    {
+      'data/never-q.json': payload
+    }
+  );
+}
+
+
+/**
+ * Converts BigQuery headers + rows into clean JSON objects.
+ */
+function rowsToNeverQObjects(headers, rows) {
+  return rows.map(function(row) {
+    const obj = {};
+
+    headers.forEach(function(header, i) {
+      let value = row[i];
+
+      if (header === 'bds_attended') {
+        value = Number(value || 0);
+      }
+
+      if (header === 'user_id' || header === 'home_region_id') {
+        value = value === null || value === undefined ? null : String(value);
+      }
+
+      obj[header] = value;
+    });
+
+    return obj;
+  });
+}
+// ── Configuration ────────────────────────────────────────────────────────────
+
+const DEFAULT_WEEKS_AHEAD = 2;
+
+const AO_CONFIG = [
+  { ao: 'The Fountain',   channelId: SLACK_CHANNEL_THE_FOUNTAIN,   enabled: true, weeksAhead: 2 },
+  { ao: 'The Farm',       channelId: SLACK_CHANNEL_THE_FARM,       enabled: true, weeksAhead: 2 },
+  { ao: 'The Plant',      channelId: SLACK_CHANNEL_THE_PLANT,      enabled: true, weeksAhead: 2 },
+  { ao: 'The Clocktower', channelId: SLACK_CHANNEL_THE_CLOCKTOWER, enabled: true, weeksAhead: 2 },
+  { ao: 'The Yard',       channelId: SLACK_CHANNEL_THE_YARD,       enabled: true, weeksAhead: 2 },
+  { ao: 'The Factory',    channelId: SLACK_CHANNEL_THE_FACTORY,    enabled: true, weeksAhead: 2 },
+  { ao: 'The Floor',      channelId: SLACK_CHANNEL_THE_FLOOR,      enabled: true, weeksAhead: 2 },
+  { ao: 'The Redzone',    channelId: SLACK_CHANNEL_THE_REDZONE,    enabled: true, weeksAhead: 2 },
+  { ao: 'The Show',       channelId: SLACK_CHANNEL_THE_SHOW,       enabled: true, weeksAhead: 1 },
+  { ao: 'The Dock',       channelId: SLACK_CHANNEL_THE_DOCK,       enabled: true, weeksAhead: 2 },
+  { ao: 'The Cafeteria',  channelId: SLACK_CHANNEL_THE_CAFETERIA,  enabled: true, weeksAhead: 2 },
+  { ao: 'The Forge',      channelId: SLACK_CHANNEL_THE_FORGE,      enabled: true, weeksAhead: 2 },
+  { ao: 'The Breakroom',  channelId: SLACK_CHANNEL_THE_BREAKROOM,  enabled: true, weeksAhead: 2 },
+];
+
+// ── Main ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Kept so the existing time-based trigger (bound to this name) keeps firing.
+ * The work now lives in postOpenQSlotsToSiteQs().
+ */
+function postOpenQSlotsToAOChannels() {
+  postOpenQSlotsToSiteQs();
+}
+
+/**
+ * DMs each site Q the open Q slots at the AO(s) they run.
+ *
+ * A site Q who covers more than one AO (e.g. Peach: The Breakroom + The Clocktower)
+ * gets ONE DM listing every AO. If the site Q can't be resolved in Slack, that AO's
+ * slots fall back to being posted in the AO channel so they still get seen.
+ */
+function postOpenQSlotsToSiteQs() {
+  const enabled = AO_CONFIG.filter(function(c) { return c.enabled; });
+  if (!enabled.length) return;
+
+  // Use the largest weeksAhead across enabled AOs so one query covers all of them
+  const maxWeeks = Math.max(...enabled.map(function(c) {
+    return c.weeksAhead || DEFAULT_WEEKS_AHEAD;
+  }));
+
+  const aoNames = enabled.map(function(c) { return "'" + c.ao + "'"; }).join(',');
+
+  const sql = `
+    SELECT ao_name, start_date
+    FROM \`f3data.analytics.future_event_info\`
+    WHERE region_org_id = 38363
+      AND planned_q_user_id IS NULL
+      AND start_date >= CURRENT_DATE()
+      AND start_date <= DATE_ADD(CURRENT_DATE(), INTERVAL ${maxWeeks} WEEK)
+      AND ao_name IN (${aoNames})
+    ORDER BY ao_name, start_date`;
+
+  const { headers, rows } = runBigQuery(sql);
+  const aoIdx   = headers.indexOf('ao_name');
+  const dateIdx = headers.indexOf('start_date');
+
+  // Group rows by AO
+  const slotsByAO = {};
+  rows.forEach(function(row) {
+    const ao = row[aoIdx];
+    if (!slotsByAO[ao]) slotsByAO[ao] = [];
+    slotsByAO[ao].push(row[dateIdx]); // 'YYYY-MM-DD'
+  });
+
+  const siteQMap = getAoToSiteQMap();
+
+  // Bucket each AO's open slots under the site Q who owns it, so a site Q
+  // covering several AOs gets a single DM.
+  const bucketsBySiteQ = {};   // siteQ name -> [{ config, weeks, slots }]
+  const orphans        = [];   // AOs with no site Q mapped -> channel fallback
+
+  enabled.forEach(function(config) {
+    const weeks    = config.weeksAhead || DEFAULT_WEEKS_AHEAD;
+    const cutoff   = getCutoffDate_(weeks);
+    const allSlots = slotsByAO[config.ao] || [];
+
+    // Trim to this AO's specific window in case it's shorter than maxWeeks
+    const slots = allSlots.filter(function(d) { return d <= cutoff; });
+
+    if (!slots.length) {
+      Logger.log(config.ao + ': no open slots in next ' + weeks + ' week(s), skipping');
+      return;
+    }
+
+    const entry = { config: config, weeks: weeks, slots: slots };
+    const siteQ = siteQMap[aoSlug_(config.ao)];
+
+    if (!siteQ) {
+      Logger.log(config.ao + ': no site Q in AO_SITEQ, falling back to channel');
+      orphans.push(entry);
+      return;
+    }
+
+    if (!bucketsBySiteQ[siteQ]) bucketsBySiteQ[siteQ] = [];
+    bucketsBySiteQ[siteQ].push(entry);
+  });
+
+  Object.keys(bucketsBySiteQ).forEach(function(siteQ) {
+    const entries = bucketsBySiteQ[siteQ];
+
+    try {
+      sendSiteQDM_(siteQ, buildSiteQMessage_(entries));
+      Logger.log(siteQ + ': DMed ' + entries.length + ' AO(s), ' +
+        entries.reduce(function(n, e) { return n + e.slots.length; }, 0) + ' slot(s)');
+    } catch (err) {
+      Logger.log('site Q ' + siteQ + ' not reachable (' + err.message +
+        '), falling back to channel for ' + entries.length + ' AO(s)');
+      entries.forEach(function(entry) { postEntryToChannel_(entry); });
+    }
+  });
+
+  orphans.forEach(function(entry) { postEntryToChannel_(entry); });
+}
+
+// ── Open Q slot message builders ─────────────────────────────────────────────
+
+/** 'The Fountain' -> 'the_fountain', to join AO_CONFIG against AO_SITEQ. */
+function aoSlug_(aoName) {
+  return aoName.toLowerCase().trim().replace(/\s+/g, '_');
+}
+
+function weeksLabel_(weeks) {
+  return weeks === 1 ? 'next week' : 'next ' + weeks + ' weeks';
+}
+
+function slotLines_(slots) {
+  return slots.map(function(d) { return '• ' + formatQDate_(d); }).join('\n');
+}
+
+/** The DM body — one section per AO the site Q covers. */
+function buildSiteQMessage_(entries) {
+  const intro = entries.length === 1
+    ? '*Open Q slots at ' + entries[0].config.ao + ' (' + weeksLabel_(entries[0].weeks) + '):*\n'
+    : '*Open Q slots you need to fill:*\n\n';
+
+  const body = entries.length === 1
+    ? slotLines_(entries[0].slots)
+    : entries.map(function(e) {
+        return '*' + e.config.ao + '* (' + weeksLabel_(e.weeks) + ')\n' + slotLines_(e.slots);
+      }).join('\n\n');
+
+  return intro + body + '\n\n' +
+    'Type `/calendar` to fill a slot, or put out a call in your AO channel. :microphone:';
+}
+
+/** The original channel post, used as the fallback path. */
+function postEntryToChannel_(entry) {
+  const text =
+    '*Open Q slots for the ' + weeksLabel_(entry.weeks) + ' at ' + entry.config.ao + ':*\n' +
+    slotLines_(entry.slots) + '\n' +
+    'Type `/calendar` to grab a slot — open Q spots filling fast! :microphone:';
+
+  postMessageToSlack_(getTargetChannel_(entry.config.channelId), text);
+  Logger.log(entry.config.ao + ': posted ' + entry.slots.length + ' slot(s) to channel');
+}
+
+/**
+ * DMs a site Q by F3 name. When DEBUG_ON, every DM goes to the Comms Q
+ * (COMMZQ) instead, tagged with who it was meant for.
+ */
+function sendSiteQDM_(siteQName, text) {
+  if (DEBUG_ON) {
+    sendSlackDMByUsername_(COMMZQ, '_(DM intended for ' + siteQName + ')_\n' + text);
+    return;
+  }
+  sendSlackDMByUsername_(siteQName, text);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function postMessageToSlack_(channelId, text) {
+  const res = UrlFetchApp.fetch('https://slack.com/api/chat.postMessage', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + slackBotToken },
+    payload: JSON.stringify({ channel: channelId, text: text }),
+    muteHttpExceptions: true
+  });
+
+  const body = JSON.parse(res.getContentText());
+  if (!body.ok) {
+    throw new Error('chat.postMessage failed for ' + channelId + ': ' + body.error);
+  }
+}
+
+function getCutoffDate_(weeks) {
+  const d = new Date();
+  d.setDate(d.getDate() + weeks * 7);
+  return Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+}
+
+function formatQDate_(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return Utilities.formatDate(d, Session.getScriptTimeZone(), 'EEE, MMM d');
+}
