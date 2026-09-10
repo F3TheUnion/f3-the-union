@@ -33,11 +33,15 @@ Status: `[ ]` todo · `[x]` done · `[-]` declined
   `testLookup`s differed only in the test name; kept the `DUFRESNE` one. No
   duplicate function names remain in the file.
 
-- [ ] **6. Delete test leftover globals** (~629–633): `kinevil`, `floppy`,
-  `uniball`, `slackToken`, `userId`.
+- [x] **6. Test leftover globals removed:** `kinevil`, `floppy`, `uniball`,
+  `slackToken`, `userId`. Nothing in production referenced them — the real code
+  declares its own local `slackToken` and `userId`.
 
-- [ ] **7. Delete scratch functions:** `sendSlackTest`, `sendSlackDM`,
-  `debugOpenDM`, both `testLookup`s.
+- [x] **7. Scratch functions removed:** `sendSlackTest`, `sendSlackDM`,
+  `debugOpenDM` (82 lines with the globals above). Verified zero callers —
+  reachable only from the editor's Run dropdown — and `sendSlackDMByUsername_`
+  supersedes all three. `testLookup` was KEPT: it is the quickest way to check a
+  site Q name still resolves in Slack.
 
 ## Organization
 
