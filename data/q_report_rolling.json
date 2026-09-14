@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-09-10T16:17:37.581Z",
+  "generated_at": "2026-09-14T01:36:11.615Z",
   "window_days": 60,
   "region_org_id": 38363,
-  "count": 109,
+  "count": 106,
   "data": [
     {
       "pax": "Coyote",
@@ -35,18 +35,18 @@
       "attended_since_last_q": 9
     },
     {
-      "pax": "Turtle Dove",
-      "user_id": "8207",
+      "pax": "Heidi",
+      "user_id": "13214",
       "last_q_date": null,
       "last_q_ao": null,
       "planned_q_date": null,
       "planned_q_ao": null,
       "q_status": "Never Q",
-      "attended_since_last_q": 9
+      "attended_since_last_q": 8
     },
     {
-      "pax": "Heidi",
-      "user_id": "13214",
+      "pax": "Turtle Dove",
+      "user_id": "8207",
       "last_q_date": null,
       "last_q_ao": null,
       "planned_q_date": null,
@@ -65,26 +65,6 @@
       "attended_since_last_q": 8
     },
     {
-      "pax": "Guano",
-      "user_id": "119134",
-      "last_q_date": null,
-      "last_q_ao": null,
-      "planned_q_date": null,
-      "planned_q_ao": null,
-      "q_status": "Never Q",
-      "attended_since_last_q": 7
-    },
-    {
-      "pax": "Id10t",
-      "user_id": "99792",
-      "last_q_date": null,
-      "last_q_ao": null,
-      "planned_q_date": null,
-      "planned_q_ao": null,
-      "q_status": "Never Q",
-      "attended_since_last_q": 7
-    },
-    {
       "pax": "Swiper",
       "user_id": "133123",
       "last_q_date": null,
@@ -95,18 +75,28 @@
       "attended_since_last_q": 7
     },
     {
-      "pax": "Feeny",
-      "user_id": "99867",
+      "pax": "Guano",
+      "user_id": "119134",
       "last_q_date": null,
       "last_q_ao": null,
       "planned_q_date": null,
       "planned_q_ao": null,
       "q_status": "Never Q",
-      "attended_since_last_q": 5
+      "attended_since_last_q": 6
     },
     {
-      "pax": "McStuffins ",
-      "user_id": "40204",
+      "pax": "Id10t",
+      "user_id": "99792",
+      "last_q_date": null,
+      "last_q_ao": null,
+      "planned_q_date": null,
+      "planned_q_ao": null,
+      "q_status": "Never Q",
+      "attended_since_last_q": 6
+    },
+    {
+      "pax": "Feeny",
+      "user_id": "99867",
       "last_q_date": null,
       "last_q_ao": null,
       "planned_q_date": null,
@@ -125,6 +115,16 @@
       "attended_since_last_q": 5
     },
     {
+      "pax": "Spladle",
+      "user_id": "123517",
+      "last_q_date": null,
+      "last_q_ao": null,
+      "planned_q_date": null,
+      "planned_q_ao": null,
+      "q_status": "Never Q",
+      "attended_since_last_q": 5
+    },
+    {
       "pax": "Dorothy",
       "user_id": "99756",
       "last_q_date": null,
@@ -135,8 +135,8 @@
       "attended_since_last_q": 4
     },
     {
-      "pax": "Pitstop",
-      "user_id": "132946",
+      "pax": "McStuffins ",
+      "user_id": "40204",
       "last_q_date": null,
       "last_q_ao": null,
       "planned_q_date": null,
@@ -145,8 +145,8 @@
       "attended_since_last_q": 4
     },
     {
-      "pax": "Spladle",
-      "user_id": "123517",
+      "pax": "Pitstop",
+      "user_id": "132946",
       "last_q_date": null,
       "last_q_ao": null,
       "planned_q_date": null,
@@ -245,16 +245,6 @@
       "attended_since_last_q": 2
     },
     {
-      "pax": "William Woodrum",
-      "user_id": "129323",
-      "last_q_date": null,
-      "last_q_ao": null,
-      "planned_q_date": null,
-      "planned_q_ao": null,
-      "q_status": "Never Q",
-      "attended_since_last_q": 2
-    },
-    {
       "pax": "BigRig",
       "user_id": "99900",
       "last_q_date": null,
@@ -267,16 +257,6 @@
     {
       "pax": "Boo Bear",
       "user_id": "19800",
-      "last_q_date": null,
-      "last_q_ao": null,
-      "planned_q_date": null,
-      "planned_q_ao": null,
-      "q_status": "Never Q",
-      "attended_since_last_q": 1
-    },
-    {
-      "pax": "Charlotte",
-      "user_id": "122864",
       "last_q_date": null,
       "last_q_ao": null,
       "planned_q_date": null,
@@ -435,16 +415,6 @@
       "attended_since_last_q": 1
     },
     {
-      "pax": "Newman",
-      "user_id": "130310",
-      "last_q_date": null,
-      "last_q_ao": null,
-      "planned_q_date": null,
-      "planned_q_ao": null,
-      "q_status": "Never Q",
-      "attended_since_last_q": 1
-    },
-    {
       "pax": "Phat Suit",
       "user_id": "8299",
       "last_q_date": null,
@@ -525,16 +495,6 @@
       "attended_since_last_q": 1
     },
     {
-      "pax": "Speedbump",
-      "user_id": "129621",
-      "last_q_date": null,
-      "last_q_ao": null,
-      "planned_q_date": null,
-      "planned_q_ao": null,
-      "q_status": "Never Q",
-      "attended_since_last_q": 1
-    },
-    {
       "pax": "Totaled",
       "user_id": "95168",
       "last_q_date": null,
@@ -555,6 +515,16 @@
       "attended_since_last_q": 1
     },
     {
+      "pax": "William Woodrum",
+      "user_id": "129323",
+      "last_q_date": null,
+      "last_q_ao": null,
+      "planned_q_date": null,
+      "planned_q_ao": null,
+      "q_status": "Never Q",
+      "attended_since_last_q": 1
+    },
+    {
       "pax": "spikeball",
       "user_id": "7490",
       "last_q_date": null,
@@ -565,14 +535,14 @@
       "attended_since_last_q": 1
     },
     {
-      "pax": "Kinevil",
-      "user_id": "7984",
-      "last_q_date": "2026-07-13",
-      "last_q_ao": "The Farm",
+      "pax": "Kit Kat",
+      "user_id": "99790",
+      "last_q_date": "2026-07-23",
+      "last_q_ao": "The Factory",
       "planned_q_date": null,
       "planned_q_ao": null,
       "q_status": "Has Q",
-      "attended_since_last_q": 26
+      "attended_since_last_q": 18
     },
     {
       "pax": "Barf",
@@ -582,27 +552,7 @@
       "planned_q_date": null,
       "planned_q_ao": null,
       "q_status": "Has Q",
-      "attended_since_last_q": 16
-    },
-    {
-      "pax": "Kit Kat",
-      "user_id": "99790",
-      "last_q_date": "2026-07-23",
-      "last_q_ao": "The Factory",
-      "planned_q_date": null,
-      "planned_q_ao": null,
-      "q_status": "Has Q",
-      "attended_since_last_q": 16
-    },
-    {
-      "pax": "Foghorn",
-      "user_id": "99902",
-      "last_q_date": "2026-08-12",
-      "last_q_ao": "The Dock",
-      "planned_q_date": null,
-      "planned_q_ao": null,
-      "q_status": "Has Q",
-      "attended_since_last_q": 15
+      "attended_since_last_q": 17
     },
     {
       "pax": "Pamela",
@@ -622,7 +572,7 @@
       "planned_q_date": null,
       "planned_q_ao": null,
       "q_status": "Has Q",
-      "attended_since_last_q": 11
+      "attended_since_last_q": 13
     },
     {
       "pax": "Poindexter",
@@ -645,6 +595,36 @@
       "attended_since_last_q": 11
     },
     {
+      "pax": "Gucci",
+      "user_id": "7871",
+      "last_q_date": "2026-08-12",
+      "last_q_ao": "The Farm",
+      "planned_q_date": null,
+      "planned_q_ao": null,
+      "q_status": "Has Q",
+      "attended_since_last_q": 9
+    },
+    {
+      "pax": "Pom Pom",
+      "user_id": "131886",
+      "last_q_date": "2026-08-28",
+      "last_q_ao": "The Floor",
+      "planned_q_date": null,
+      "planned_q_ao": null,
+      "q_status": "Has Q",
+      "attended_since_last_q": 9
+    },
+    {
+      "pax": "Iceberg",
+      "user_id": "7869",
+      "last_q_date": "2026-07-31",
+      "last_q_ao": "The Floor",
+      "planned_q_date": null,
+      "planned_q_ao": null,
+      "q_status": "Has Q",
+      "attended_since_last_q": 8
+    },
+    {
       "pax": "After Market",
       "user_id": "7911",
       "last_q_date": "2026-08-05",
@@ -655,40 +635,10 @@
       "attended_since_last_q": 7
     },
     {
-      "pax": "Gucci",
-      "user_id": "7871",
-      "last_q_date": "2026-08-12",
-      "last_q_ao": "The Farm",
-      "planned_q_date": null,
-      "planned_q_ao": null,
-      "q_status": "Has Q",
-      "attended_since_last_q": 7
-    },
-    {
-      "pax": "Iceberg",
-      "user_id": "7869",
-      "last_q_date": "2026-07-31",
-      "last_q_ao": "The Floor",
-      "planned_q_date": null,
-      "planned_q_ao": null,
-      "q_status": "Has Q",
-      "attended_since_last_q": 7
-    },
-    {
       "pax": "Midriff",
       "user_id": "7799",
       "last_q_date": "2026-07-25",
       "last_q_ao": "The Plant",
-      "planned_q_date": null,
-      "planned_q_ao": null,
-      "q_status": "Has Q",
-      "attended_since_last_q": 7
-    },
-    {
-      "pax": "Pom Pom",
-      "user_id": "131886",
-      "last_q_date": "2026-08-28",
-      "last_q_ao": "The Floor",
       "planned_q_date": null,
       "planned_q_ao": null,
       "q_status": "Has Q",
@@ -715,6 +665,16 @@
       "attended_since_last_q": 5
     },
     {
+      "pax": "Outhouse",
+      "user_id": "99869",
+      "last_q_date": "2026-08-10",
+      "last_q_ao": "The Dock",
+      "planned_q_date": null,
+      "planned_q_ao": null,
+      "q_status": "Has Q",
+      "attended_since_last_q": 5
+    },
+    {
       "pax": "Alice",
       "user_id": "7907",
       "last_q_date": "2026-08-28",
@@ -732,23 +692,33 @@
       "planned_q_date": null,
       "planned_q_ao": null,
       "q_status": "Has Q",
-      "attended_since_last_q": 3
-    },
-    {
-      "pax": "Gepetto",
-      "user_id": "41906",
-      "last_q_date": "2026-08-25",
-      "last_q_ao": "The Clocktower",
-      "planned_q_date": null,
-      "planned_q_ao": null,
-      "q_status": "Has Q",
-      "attended_since_last_q": 3
+      "attended_since_last_q": 4
     },
     {
       "pax": "Hobo",
       "user_id": "99880",
       "last_q_date": "2026-08-31",
       "last_q_ao": "The Fountain",
+      "planned_q_date": null,
+      "planned_q_ao": null,
+      "q_status": "Has Q",
+      "attended_since_last_q": 4
+    },
+    {
+      "pax": "beaker",
+      "user_id": "58241",
+      "last_q_date": "2026-09-01",
+      "last_q_ao": "The Redzone",
+      "planned_q_date": null,
+      "planned_q_ao": null,
+      "q_status": "Has Q",
+      "attended_since_last_q": 4
+    },
+    {
+      "pax": "Gepetto",
+      "user_id": "41906",
+      "last_q_date": "2026-08-25",
+      "last_q_ao": "The Clocktower",
       "planned_q_date": null,
       "planned_q_ao": null,
       "q_status": "Has Q",
@@ -769,6 +739,16 @@
       "user_id": "7880",
       "last_q_date": "2026-08-15",
       "last_q_ao": "The Plant",
+      "planned_q_date": null,
+      "planned_q_ao": null,
+      "q_status": "Has Q",
+      "attended_since_last_q": 3
+    },
+    {
+      "pax": "Precious",
+      "user_id": "88672",
+      "last_q_date": "2026-08-27",
+      "last_q_ao": "The Redzone",
       "planned_q_date": null,
       "planned_q_ao": null,
       "q_status": "Has Q",
@@ -805,10 +785,20 @@
       "attended_since_last_q": 2
     },
     {
-      "pax": "Floppy Disk",
-      "user_id": "23132",
-      "last_q_date": "2026-09-01",
-      "last_q_ao": "The Show",
+      "pax": "Bernie",
+      "user_id": "7863",
+      "last_q_date": "2026-08-29",
+      "last_q_ao": "The Plant",
+      "planned_q_date": null,
+      "planned_q_ao": null,
+      "q_status": "Has Q",
+      "attended_since_last_q": 2
+    },
+    {
+      "pax": "Charlotte",
+      "user_id": "99839",
+      "last_q_date": "2026-09-10",
+      "last_q_ao": "The Factory",
       "planned_q_date": null,
       "planned_q_ao": null,
       "q_status": "Has Q",
@@ -825,19 +815,9 @@
       "attended_since_last_q": 2
     },
     {
-      "pax": "Bernie",
-      "user_id": "7863",
-      "last_q_date": "2026-08-29",
-      "last_q_ao": "The Plant",
-      "planned_q_date": null,
-      "planned_q_ao": null,
-      "q_status": "Has Q",
-      "attended_since_last_q": 1
-    },
-    {
       "pax": "Bumblebee",
       "user_id": "99789",
-      "last_q_date": "2026-09-03",
+      "last_q_date": "2026-09-08",
       "last_q_ao": "The Show",
       "planned_q_date": null,
       "planned_q_ao": null,
@@ -855,20 +835,10 @@
       "attended_since_last_q": 1
     },
     {
-      "pax": "Precious",
-      "user_id": "88672",
-      "last_q_date": "2026-08-27",
-      "last_q_ao": "The Redzone",
-      "planned_q_date": null,
-      "planned_q_ao": null,
-      "q_status": "Has Q",
-      "attended_since_last_q": 1
-    },
-    {
-      "pax": "Puppy mill",
-      "user_id": "99882",
-      "last_q_date": "2026-09-02",
-      "last_q_ao": "The Fountain",
+      "pax": "Shrink",
+      "user_id": "7748",
+      "last_q_date": "2026-09-03",
+      "last_q_ao": "The Factory",
       "planned_q_date": null,
       "planned_q_ao": null,
       "q_status": "Has Q",
@@ -885,20 +855,40 @@
       "attended_since_last_q": 1
     },
     {
-      "pax": "beaker",
-      "user_id": "58241",
-      "last_q_date": "2026-09-01",
+      "pax": "Cabana Boy",
+      "user_id": "99795",
+      "last_q_date": "2026-09-11",
+      "last_q_ao": "The Floor",
+      "planned_q_date": null,
+      "planned_q_ao": null,
+      "q_status": "Has Q",
+      "attended_since_last_q": 0
+    },
+    {
+      "pax": "Foghorn",
+      "user_id": "99902",
+      "last_q_date": "2026-09-12",
+      "last_q_ao": "The Plant",
+      "planned_q_date": null,
+      "planned_q_ao": null,
+      "q_status": "Has Q",
+      "attended_since_last_q": 0
+    },
+    {
+      "pax": "Kinevil",
+      "user_id": "7984",
+      "last_q_date": "2026-09-08",
       "last_q_ao": "The Redzone",
       "planned_q_date": null,
       "planned_q_ao": null,
       "q_status": "Has Q",
-      "attended_since_last_q": 1
+      "attended_since_last_q": 0
     },
     {
-      "pax": "Shrink",
-      "user_id": "7748",
-      "last_q_date": "2026-09-03",
-      "last_q_ao": "The Factory",
+      "pax": "Ocho ",
+      "user_id": "11856",
+      "last_q_date": "2026-09-11",
+      "last_q_ao": "The Yard",
       "planned_q_date": null,
       "planned_q_ao": null,
       "q_status": "Has Q",
@@ -935,22 +925,12 @@
       "attended_since_last_q": 0
     },
     {
-      "pax": "Charlotte",
-      "user_id": "99839",
-      "last_q_date": "2026-09-04",
-      "last_q_ao": "The Yard",
-      "planned_q_date": "2026-09-10",
-      "planned_q_ao": "The Factory",
-      "q_status": "Future Q Scheduled",
-      "attended_since_last_q": 0
-    },
-    {
-      "pax": "Outhouse",
-      "user_id": "99869",
-      "last_q_date": "2026-08-10",
-      "last_q_ao": "The Dock",
-      "planned_q_date": "2026-09-10",
-      "planned_q_ao": "The Show",
+      "pax": "Floppy Disk",
+      "user_id": "23132",
+      "last_q_date": "2026-09-01",
+      "last_q_ao": "The Show",
+      "planned_q_date": "2026-09-14",
+      "planned_q_ao": "The Dock",
       "q_status": "Future Q Scheduled",
       "attended_since_last_q": 0
     },
@@ -959,38 +939,28 @@
       "user_id": "13264",
       "last_q_date": "2026-09-10",
       "last_q_ao": "The Clocktower",
-      "planned_q_date": "2026-09-10",
-      "planned_q_ao": "The Clocktower",
+      "planned_q_date": "2026-09-14",
+      "planned_q_ao": "The Farm",
       "q_status": "Future Q Scheduled",
       "attended_since_last_q": 0
     },
     {
-      "pax": "Pop Up",
-      "user_id": "99897",
-      "last_q_date": "2026-07-23",
-      "last_q_ao": "The Redzone",
-      "planned_q_date": "2026-09-10",
-      "planned_q_ao": "The Redzone",
-      "q_status": "Future Q Scheduled",
-      "attended_since_last_q": 0
-    },
-    {
-      "pax": "Cabana Boy",
-      "user_id": "99795",
-      "last_q_date": "2026-08-11",
-      "last_q_ao": "The Factory",
-      "planned_q_date": "2026-09-11",
-      "planned_q_ao": "The Floor",
-      "q_status": "Future Q Scheduled",
-      "attended_since_last_q": -1
-    },
-    {
-      "pax": "Ocho ",
-      "user_id": "11856",
+      "pax": "Puppy mill",
+      "user_id": "99882",
       "last_q_date": "2026-09-02",
-      "last_q_ao": "The Farm",
-      "planned_q_date": "2026-09-11",
-      "planned_q_ao": "The Yard",
+      "last_q_ao": "The Fountain",
+      "planned_q_date": "2026-09-14",
+      "planned_q_ao": "The Fountain",
+      "q_status": "Future Q Scheduled",
+      "attended_since_last_q": 0
+    },
+    {
+      "pax": "Bluey",
+      "user_id": "13263",
+      "last_q_date": "2026-08-25",
+      "last_q_ao": "The Factory",
+      "planned_q_date": "2026-09-15",
+      "planned_q_ao": "The Factory",
       "q_status": "Future Q Scheduled",
       "attended_since_last_q": -1
     },
@@ -1002,7 +972,7 @@
       "planned_q_date": "2026-09-15",
       "planned_q_ao": "The Redzone",
       "q_status": "Future Q Scheduled",
-      "attended_since_last_q": -5
+      "attended_since_last_q": -1
     },
     {
       "pax": "Peach",
@@ -1012,17 +982,7 @@
       "planned_q_date": "2026-09-15",
       "planned_q_ao": "The Clocktower",
       "q_status": "Future Q Scheduled",
-      "attended_since_last_q": -5
-    },
-    {
-      "pax": "Bluey",
-      "user_id": "13263",
-      "last_q_date": "2026-08-25",
-      "last_q_ao": "The Factory",
-      "planned_q_date": "2026-09-16",
-      "planned_q_ao": "The Farm",
-      "q_status": "Future Q Scheduled",
-      "attended_since_last_q": -6
+      "attended_since_last_q": -1
     },
     {
       "pax": "Coffin",
@@ -1032,7 +992,7 @@
       "planned_q_date": "2026-09-16",
       "planned_q_ao": "The Dock",
       "q_status": "Future Q Scheduled",
-      "attended_since_last_q": -6
+      "attended_since_last_q": -2
     },
     {
       "pax": "Dufrense",
@@ -1042,7 +1002,17 @@
       "planned_q_date": "2026-09-17",
       "planned_q_ao": "The Clocktower",
       "q_status": "Future Q Scheduled",
-      "attended_since_last_q": -7
+      "attended_since_last_q": -3
+    },
+    {
+      "pax": "Pop Up",
+      "user_id": "99897",
+      "last_q_date": "2026-09-10",
+      "last_q_ao": "The Redzone",
+      "planned_q_date": "2026-09-18",
+      "planned_q_ao": "The Floor",
+      "q_status": "Future Q Scheduled",
+      "attended_since_last_q": -4
     },
     {
       "pax": "SlipNSlide",
@@ -1052,7 +1022,7 @@
       "planned_q_date": "2026-09-24",
       "planned_q_ao": "The Clocktower",
       "q_status": "Future Q Scheduled",
-      "attended_since_last_q": -14
+      "attended_since_last_q": -10
     },
     {
       "pax": "Dewey",
@@ -1062,7 +1032,7 @@
       "planned_q_date": "2026-09-25",
       "planned_q_ao": "The Floor",
       "q_status": "Future Q Scheduled",
-      "attended_since_last_q": -15
+      "attended_since_last_q": -11
     },
     {
       "pax": "Rugrat",
@@ -1072,7 +1042,7 @@
       "planned_q_date": "2026-10-01",
       "planned_q_ao": "The Clocktower",
       "q_status": "Future Q Scheduled",
-      "attended_since_last_q": -21
+      "attended_since_last_q": -17
     },
     {
       "pax": "BodyPump",
@@ -1082,7 +1052,7 @@
       "planned_q_date": "2026-10-06",
       "planned_q_ao": "The Clocktower",
       "q_status": "Future Q Scheduled",
-      "attended_since_last_q": -26
+      "attended_since_last_q": -22
     },
     {
       "pax": "Destiny",
@@ -1092,7 +1062,7 @@
       "planned_q_date": "2026-10-08",
       "planned_q_ao": "The Clocktower",
       "q_status": "Future Q Scheduled",
-      "attended_since_last_q": -28
+      "attended_since_last_q": -24
     }
   ]
 }
