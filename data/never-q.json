@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-09-14T01:36:21.401Z",
+  "generated_at": "2026-09-21T01:35:55.607Z",
   "window_days": 60,
   "region_org_id": 38363,
   "report": "never_q",
   "identity_key": "user_id",
-  "count": 30,
+  "count": 29,
   "data": [
     {
       "pax": "Coyote",
       "user_id": "130205",
       "home_region_id": "38363",
-      "bds_attended": 11,
-      "last_attended_date": "2026-09-09",
+      "bds_attended": 12,
+      "last_attended_date": "2026-09-16",
       "last_attended_ao": "The Farm",
       "q_status": "Never Q"
     },
@@ -19,8 +19,8 @@
       "pax": "Swiper",
       "user_id": "133123",
       "home_region_id": "38363",
-      "bds_attended": 7,
-      "last_attended_date": "2026-09-10",
+      "bds_attended": 9,
+      "last_attended_date": "2026-09-17",
       "last_attended_ao": "The Clocktower",
       "q_status": "Never Q"
     },
@@ -29,7 +29,7 @@
       "user_id": "119134",
       "home_region_id": "38363",
       "bds_attended": 6,
-      "last_attended_date": "2026-09-09",
+      "last_attended_date": "2026-09-16",
       "last_attended_ao": "The Dock",
       "q_status": "Never Q"
     },
@@ -38,7 +38,7 @@
       "user_id": "123517",
       "home_region_id": "38363",
       "bds_attended": 5,
-      "last_attended_date": "2026-09-11",
+      "last_attended_date": "2026-09-18",
       "last_attended_ao": "The Floor",
       "q_status": "Never Q"
     },
@@ -52,6 +52,15 @@
       "q_status": "Never Q"
     },
     {
+      "pax": "Preemie",
+      "user_id": "134783",
+      "home_region_id": "38363",
+      "bds_attended": 4,
+      "last_attended_date": "2026-09-17",
+      "last_attended_ao": "The Clocktower",
+      "q_status": "Never Q"
+    },
+    {
       "pax": "Pitstop",
       "user_id": "132946",
       "home_region_id": "38363",
@@ -61,12 +70,12 @@
       "q_status": "Never Q"
     },
     {
-      "pax": "Preemie",
-      "user_id": "134783",
+      "pax": "Duck Fart",
+      "user_id": "136161",
       "home_region_id": "38363",
       "bds_attended": 3,
-      "last_attended_date": "2026-09-10",
-      "last_attended_ao": "The Clocktower",
+      "last_attended_date": "2026-09-15",
+      "last_attended_ao": "The Show",
       "q_status": "Never Q"
     },
     {
@@ -85,15 +94,6 @@
       "bds_attended": 3,
       "last_attended_date": "2026-08-25",
       "last_attended_ao": "The Redzone",
-      "q_status": "Never Q"
-    },
-    {
-      "pax": "Duck Fart",
-      "user_id": "136161",
-      "home_region_id": "38363",
-      "bds_attended": 2,
-      "last_attended_date": "2026-09-03",
-      "last_attended_ao": "The Show",
       "q_status": "Never Q"
     },
     {
@@ -265,15 +265,6 @@
       "bds_attended": 1,
       "last_attended_date": "2026-08-01",
       "last_attended_ao": "The Plant",
-      "q_status": "Never Q"
-    },
-    {
-      "pax": "William Woodrum",
-      "user_id": "129323",
-      "home_region_id": "38363",
-      "bds_attended": 1,
-      "last_attended_date": "2026-07-16",
-      "last_attended_ao": "The Clocktower",
       "q_status": "Never Q"
     }
   ]
