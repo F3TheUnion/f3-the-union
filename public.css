@@ -359,6 +359,23 @@ button:disabled {
   color: #d8dccf;
 }
 
+.fia-layout {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.fia-logo {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.fia-layout .section-heading {
+  margin-bottom: 0;
+}
+
 .pillars {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -949,6 +966,10 @@ textarea {
   .pillars,
   .contact-layout {
     grid-template-columns: 1fr;
+  }
+
+  .fia-layout {
+    grid-template-columns: 120px 1fr;
   }
 }
 

@@ -2,6 +2,9 @@ const sessionCookieName = 'f3_union_session';
 
 export async function onRequest(ctx) {
   const url = new URL(ctx.request.url);
+  if (/^\/fia\/?$/i.test(url.pathname)) {
+    return Response.redirect('https://fianation.com/locations/ohio/marysville/', 302);
+  }
   if (url.pathname !== '/pax' && !url.pathname.startsWith('/pax/')) return ctx.next();
 
   const token = getCookie(ctx.request, sessionCookieName);

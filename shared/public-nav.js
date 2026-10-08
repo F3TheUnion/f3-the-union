@@ -9,6 +9,7 @@
     '<a href="/core-principles/">Core Principles</a>' +
     '<a href="/gallery/">Gallery</a>' +
     '<a href="/testimonials/">Testimonials</a>' +
+    '<a href="/#fia">FiA</a>' +
     '<a href="/#contact">Contact</a>' +
     '</nav>' +
     '<div class="header-actions">' +
