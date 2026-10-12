@@ -1,27 +1,27 @@
 {
-  "generated_at": "2026-10-05T01:36:14.211Z",
+  "generated_at": "2026-10-12T01:35:59.312Z",
   "window_days": 60,
   "region_org_id": 38363,
   "report": "never_q",
   "identity_key": "user_id",
-  "count": 13,
+  "count": 14,
   "data": [
+    {
+      "pax": "Mid-life",
+      "user_id": "137197",
+      "home_region_id": "38363",
+      "bds_attended": 14,
+      "last_attended_date": "2026-10-09",
+      "last_attended_ao": "The Floor",
+      "q_status": "Never Q"
+    },
     {
       "pax": "Coyote",
       "user_id": "130205",
       "home_region_id": "38363",
       "bds_attended": 13,
-      "last_attended_date": "2026-09-30",
+      "last_attended_date": "2026-10-07",
       "last_attended_ao": "The Farm",
-      "q_status": "Never Q"
-    },
-    {
-      "pax": "Mid-life",
-      "user_id": "137197",
-      "home_region_id": "38363",
-      "bds_attended": 9,
-      "last_attended_date": "2026-10-01",
-      "last_attended_ao": "The Redzone",
       "q_status": "Never Q"
     },
     {
@@ -37,27 +37,27 @@
       "pax": "Duck Fart",
       "user_id": "136161",
       "home_region_id": "38363",
-      "bds_attended": 5,
-      "last_attended_date": "2026-10-01",
+      "bds_attended": 7,
+      "last_attended_date": "2026-10-08",
       "last_attended_ao": "The Show",
+      "q_status": "Never Q"
+    },
+    {
+      "pax": "Sunshine",
+      "user_id": "137332",
+      "home_region_id": "38363",
+      "bds_attended": 3,
+      "last_attended_date": "2026-10-06",
+      "last_attended_ao": "The Factory",
       "q_status": "Never Q"
     },
     {
       "pax": "Guano",
       "user_id": "119134",
       "home_region_id": "38363",
-      "bds_attended": 4,
+      "bds_attended": 3,
       "last_attended_date": "2026-09-16",
       "last_attended_ao": "The Dock",
-      "q_status": "Never Q"
-    },
-    {
-      "pax": "Pitstop",
-      "user_id": "132946",
-      "home_region_id": "38363",
-      "bds_attended": 4,
-      "last_attended_date": "2026-09-04",
-      "last_attended_ao": "The Floor",
       "q_status": "Never Q"
     },
     {
@@ -70,12 +70,12 @@
       "q_status": "Never Q"
     },
     {
-      "pax": "Feeny",
-      "user_id": "99867",
+      "pax": "Pitstop",
+      "user_id": "132946",
       "home_region_id": "38363",
       "bds_attended": 3,
-      "last_attended_date": "2026-09-03",
-      "last_attended_ao": "The Show",
+      "last_attended_date": "2026-09-04",
+      "last_attended_ao": "The Floor",
       "q_status": "Never Q"
     },
     {
@@ -88,12 +88,30 @@
       "q_status": "Never Q"
     },
     {
+      "pax": "Felon",
+      "user_id": "137832",
+      "home_region_id": "38363",
+      "bds_attended": 2,
+      "last_attended_date": "2026-10-08",
+      "last_attended_ao": "The Clocktower",
+      "q_status": "Never Q"
+    },
+    {
       "pax": "Salty",
       "user_id": "123577",
       "home_region_id": "38363",
       "bds_attended": 2,
       "last_attended_date": "2026-09-22",
       "last_attended_ao": "The Redzone",
+      "q_status": "Never Q"
+    },
+    {
+      "pax": "Luke Green",
+      "user_id": "137196",
+      "home_region_id": "38363",
+      "bds_attended": 1,
+      "last_attended_date": "2026-10-09",
+      "last_attended_ao": "The Floor",
       "q_status": "Never Q"
     },
     {
@@ -106,21 +124,12 @@
       "q_status": "Never Q"
     },
     {
-      "pax": "Sunshine",
-      "user_id": "137332",
+      "pax": "Feeny",
+      "user_id": "99867",
       "home_region_id": "38363",
       "bds_attended": 1,
-      "last_attended_date": "2026-09-24",
-      "last_attended_ao": "The Factory",
-      "q_status": "Never Q"
-    },
-    {
-      "pax": "Lombard",
-      "user_id": "131885",
-      "home_region_id": "38363",
-      "bds_attended": 1,
-      "last_attended_date": "2026-08-07",
-      "last_attended_ao": "The Yard",
+      "last_attended_date": "2026-09-03",
+      "last_attended_ao": "The Show",
       "q_status": "Never Q"
     }
   ]
