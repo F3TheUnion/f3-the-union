@@ -96,16 +96,9 @@ npx wrangler d1 execute f3_the_union --remote --file people-import.sql
 ## Existing Miles Import
 
 Load `people` first. The import script maps historical entries by `people.f3_name`.
-
-```powershell
-npm run miles:sql
-npx wrangler d1 execute f3_the_union --local --file miles-import.sql
-npx wrangler d1 execute f3_the_union --remote --file miles-import.sql
-```
-
 Historical rows are stored with `source = 'google-sheets'` and `submitted_by_person_id = person_id`.
 
-If you export the original Google Sheet directly as CSV, use:
+Export the original Google Sheet as CSV, then:
 
 ```powershell
 npm run miles:sheet:sql -- google-sheet-export.csv

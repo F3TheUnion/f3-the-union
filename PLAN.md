@@ -99,23 +99,10 @@ CREATE TABLE aos (
 );
 ```
 
-### Seed data (confirmed)
+### Seed data
 
-| Slug | Name | Region | Site Q | Days | Time | Duration |
-|---|---|---|---|---|---|---|
-| the_breakroom | The Breakroom | Marysville | Peach | Fri | 6:00 | :45 |
-| the_clocktower | The Clocktower | Plain City | Peach | Tue, Thu | 5:30 | :45 |
-| the_dock | The Dock | Richwood | Coffin | Mon, Wed | 5:30 | :45 |
-| the_factory | The Factory | Marysville | Pididle | Tue, Thu | 5:30 | :45 |
-| the_farm | The Farm | Marysville | Charlotte | Mon, Wed | 5:30 | :45 |
-| the_floor | The Floor | Marysville | Dewey | Fri | 5:30 | :45 |
-| the_forge | The Forge | Richwood | Dorothy | Fri | 5:30 | :45 |
-| the_fountain | The Fountain | Bellefontaine | Harbaugh 3-5 | Mon, Wed | 5:30 | :45 |
-| the_plant | The Plant | Marysville | Vagabond | Sat | 6:30 | 1:00 |
-| the_redzone | The Redzone | Marysville | Ocho | Tue, Thu | 5:15 | 1:00 |
-| the_show | The Show | Richwood | Bumblebee | Tue, Thu | 5:15 | :45 |
-| the_yard | The Yard | Marysville | Barf | Fri | 5:30 | :45 |
-| the_cafeteria | The Cafeteria | Marysville | Alice | Fri | 5:30 | :45 |
+Original seed values are in `migrations/0007_aos.sql`. Current values live in the `aos`
+table in production D1 — don't maintain a copy here.
 
 ### Remove from FNG_LOCATIONS (API)
 

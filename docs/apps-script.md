@@ -141,22 +141,8 @@ comparison is a plain string compare.
 
 ### Who gets what
 
-12 DMs cover the 13 enabled AOs — Peach covers two:
-
-| Site Q | AO(s) |
-| --- | --- |
-| Peach | The Breakroom, The Clocktower |
-| Coffin | The Dock |
-| Charlotte | The Factory |
-| DUFRESNE | The Farm |
-| Dewey | The Floor |
-| Dorothy | The Forge |
-| Puppy mill | The Fountain |
-| Iceberg | The Plant |
-| Ocho | The Redzone |
-| Bumblebee | The Show |
-| Barf | The Yard |
-| Alice | The Cafeteria |
+One DM per site Q, covering every AO they run (a site Q can cover several). The
+current mapping lives only in `AO_SITEQ` — check there rather than keeping a copy here.
 
 ### Message shapes
 

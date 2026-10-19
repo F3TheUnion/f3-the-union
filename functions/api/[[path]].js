@@ -12,7 +12,6 @@ const DEBUGGING_CHANNEL_ID = 'C03TPUJ5WSV';
 const SITE_Q_CHANNEL_ID = 'C03T6Q9CPDX';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-// Keep in sync with pax/fng/locations.json - frontend fetches that file directly as a static asset.
 const FNG_LOCATIONS = [
   { name: 'The Farm',       slackChannelId: 'C03SC9U3JCB' },
   { name: 'The Yard',       slackChannelId: 'C03SCB1G343' },

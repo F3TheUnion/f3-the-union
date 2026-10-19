@@ -14,7 +14,7 @@
 // DEBUG_ON reroutes BOTH channel posts (getTargetChannel_) and site Q DMs
 // (sendSiteQDM_) to the debugging channel / the Comms Q. Turn it on before
 // testing anything that messages real people.
-const DEBUG_ON = true;
+const DEBUG_ON = false;
 
 const slackBotToken = PropertiesService.getScriptProperties().getProperty('slackBotToken');
 
@@ -84,10 +84,10 @@ const SLACK_CHANNEL_TRAINING_DUMP            = 'C09DJCYCNJ0';
 const AO_SITEQ = [
   { ao: 'the_breakroom', siteQ: 'Peach' },
   { ao: 'the_clocktower', siteQ: 'Peach' },
-  { ao: 'the_dock', siteQ: 'Coffin' },
+  { ao: 'the_dock', siteQ: 'Outhouse' },
   { ao: 'the_factory', siteQ: 'Charlotte' },
   { ao: 'the_farm', siteQ: 'DUFRESNE' },
-  { ao: 'the_floor', siteQ: 'Dewey' },
+  { ao: 'the_floor', siteQ: 'Hobo' },
   { ao: 'the_forge', siteQ: 'Dorothy' },
   { ao: 'the_fountain', siteQ: 'Puppy mill' },
   { ao: 'the_plant', siteQ: 'Iceberg' },

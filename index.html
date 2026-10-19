@@ -142,30 +142,6 @@
   </footer>
 
   <script>
-    const fallbackAos = {
-      Marysville: [
-        { name: 'The Farm', siteQ: 'Charlotte', days: 'Mon, Wed', startTime: '5:30', duration: ':45', address: '16265 Co Hwy 132, Marysville, OH' },
-        { name: 'The Yard', siteQ: 'Barf', days: 'Fri', startTime: '5:30', duration: ':45', address: '102 Pottersville Road, Pottersville, OH' },
-        { name: 'The Factory', siteQ: 'Pididle', days: 'Tue, Thu', startTime: '5:30', duration: ':45', address: '800 Amrine Mill Rd., Marysville, OH' },
-        { name: 'The Plant', siteQ: 'Vagabond', days: 'Sat', startTime: '6:30', duration: '1:00', address: '401 E 9th St, Marysville, OH 43040' },
-        { name: 'The Redzone', siteQ: 'Ocho', days: 'Tue, Thu', startTime: '5:15', duration: '1:00', address: '421 Grove St, Marysville, OH 43040' },
-        { name: 'The Cafeteria', siteQ: 'Alice', days: 'Fri', startTime: '5:30', duration: ':45', address: '106 Pottersville Road, Pottersville, OH' },
-        { name: 'The Floor', siteQ: 'Dewey', days: 'Fri', startTime: '5:30', duration: ':45', address: '107 Pottersville Road, Pottersville, OH' },
-        { name: 'The Breakroom', siteQ: 'Peach', days: 'Fri', startTime: '6:00', duration: ':45', address: '108 Pottersville Road, Pottersville, OH' },
-      ],
-      Richwood: [
-        { name: 'The Dock', siteQ: 'Coffin', days: 'Mon, Wed', startTime: '5:30', duration: ':45', address: '4 Lynn St, Richwood, OH' },
-        { name: 'The Forge', siteQ: 'Dorothy', days: 'Fri', startTime: '5:30', duration: ':45', address: '202 Pottersville Road, Pottersville, OH' },
-        { name: 'The Show', siteQ: 'Bumblebee', days: 'Tue, Thu', startTime: '5:15', duration: ':45', address: '1 Gill St, Richwood, OH' },
-      ],
-      'Plain City': [
-        { name: 'The Clocktower', siteQ: 'Peach', days: 'Tue, Thu', startTime: '5:30', duration: ':45', address: '301 Pottersville Road, Pottersville, OH' },
-      ],
-      Bellefontaine: [
-        { name: 'The Fountain', siteQ: 'Harbaugh 3-5', days: 'Mon, Wed', startTime: '5:30', duration: ':45', address: '401 Pottersville Road, Pottersville, OH' },
-      ],
-    };
-
     const regionImages = {
       Marysville: '/media/marysville.jpg',
       Richwood: '/media/richwood.jpg',
@@ -314,9 +290,10 @@
         const res = await fetch('/api/aos');
         if (!res.ok) throw new Error('AO request failed');
         const data = await res.json();
-        renderRegions(data.regions || fallbackAos);
+        renderRegions(data.regions || {});
       } catch {
-        renderRegions(fallbackAos);
+        document.getElementById('region-grid').innerHTML =
+          '<p class="status error">Couldn't load AOs right now. Please try again later.</p>';
       }
     }
 
