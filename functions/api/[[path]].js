@@ -98,6 +98,9 @@ export async function onRequest(ctx) {
       return await deleteReminder(ctx, person, segments[1]);
     }
 
+    if (method === 'GET' && path === '/fitness-test') return await getFitnessTest(ctx, url);
+    if (method === 'PUT' && path === '/fitness-test') return await saveFitnessTest(ctx, person);
+
     if (method === 'GET' && path === '/fng/entries') return await listFngEntries(ctx, person);
     if (segments[0] === 'fng' && segments[1] === 'entries' && segments[2] && method === 'PUT') {
       return await updateFngEntry(ctx, person, segments[2]);
@@ -590,6 +593,85 @@ async function listAos(ctx) {
   });
 
   return json({ ok: true, regions });
+}
+
+async function assertFitnessTestKey(ctx, date, aoId) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) {
+    throw new ApiError('VALIDATION_ERROR', 'Date must be YYYY-MM-DD.');
+  }
+  const ao = await ctx.env.DB.prepare('SELECT id FROM aos WHERE id = ?').bind(aoId || '').first();
+  if (!ao) throw new ApiError('VALIDATION_ERROR', 'Choose a valid AO.');
+}
+
+async function getFitnessTest(ctx, url) {
+  const date = url.searchParams.get('date');
+  const aoId = url.searchParams.get('ao');
+  await assertFitnessTestKey(ctx, date, aoId);
+  const result = await ctx.env.DB.prepare(
+    `SELECT id, pax_name AS name, burpees, big_boy_situps AS situps,
+            hand_release_merkins AS merkins, plank_seconds AS plankSeconds,
+            mile_seconds AS mileSeconds
+     FROM fitness_test_results
+     WHERE test_date = ? AND ao_id = ?
+     ORDER BY sort_order, created_at`,
+  ).bind(date, aoId).all();
+  return json({ ok: true, date, aoId, rows: result.results });
+}
+
+function fitnessCount(value, label, max) {
+  if (value === null || value === undefined || value === '') return null;
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < 0 || n > max) {
+    throw new ApiError('VALIDATION_ERROR', `${label} must be a whole number from 0 to ${max}.`);
+  }
+  return n;
+}
+
+async function saveFitnessTest(ctx, actor) {
+  const input = await body(ctx);
+  await assertFitnessTestKey(ctx, input.date, input.aoId);
+  const rows = Array.isArray(input.rows) ? input.rows : [];
+  if (rows.length > 200) throw new ApiError('VALIDATION_ERROR', 'Too many rows.');
+
+  const clean = [];
+  rows.forEach((row, index) => {
+    const name = String(row.name || '').trim().slice(0, 100);
+    const data = {
+      burpees: fitnessCount(row.burpees, 'Burpees', 9999),
+      situps: fitnessCount(row.situps, 'Big Boy Situps', 9999),
+      merkins: fitnessCount(row.merkins, 'Hand Release Merkins', 9999),
+      plankSeconds: fitnessCount(row.plankSeconds, 'Plank', 36000),
+      mileSeconds: fitnessCount(row.mileSeconds, 'Mile time', 36000),
+    };
+    const hasData = Object.values(data).some((v) => v !== null);
+    if (!name && !hasData) return;
+    if (!name) throw new ApiError('VALIDATION_ERROR', `Row ${index + 1} has results but no PAX name.`);
+    clean.push({ id: id(), name, ...data });
+  });
+
+  const db = ctx.env.DB;
+  const statements = [
+    db.prepare('DELETE FROM fitness_test_results WHERE test_date = ? AND ao_id = ?')
+      .bind(input.date, input.aoId),
+    ...clean.map((r, i) => db.prepare(
+      `INSERT INTO fitness_test_results
+         (id, test_date, ao_id, pax_name, burpees, big_boy_situps, hand_release_merkins,
+          plank_seconds, mile_seconds, sort_order, updated_at, updated_by_person_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).bind(
+      r.id, input.date, input.aoId, r.name, r.burpees, r.situps, r.merkins,
+      r.plankSeconds, r.mileSeconds, i, nowIso(), actor.id,
+    )),
+  ];
+  await db.batch(statements);
+
+  return json({
+    ok: true,
+    rows: clean.map((r) => ({
+      id: r.id, name: r.name, burpees: r.burpees, situps: r.situps, merkins: r.merkins,
+      plankSeconds: r.plankSeconds, mileSeconds: r.mileSeconds,
+    })),
+  });
 }
 
 async function contactSubmit(ctx) {

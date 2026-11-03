@@ -17,6 +17,7 @@
     '<a href="/pax/never-q/">Need VQ</a>' +
     '</div>' +
     '</details>' +
+    '<a href="/pax/fitness-test/">Fitness Test</a>' +
     '<a href="/pax/reminders/">Reminders</a>' +
     '</nav>' +
     '</header>'

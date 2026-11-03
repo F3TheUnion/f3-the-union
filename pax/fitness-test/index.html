@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Fitness Test - F3 The Union</title>
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="../../style.css" />
+  <link rel="stylesheet" href="/public.css" />
+  <style>
+    body { max-width: 1100px; }
+    .panel {
+      border: 1px solid #d7dce8;
+      border-radius: 6px;
+      padding: 1rem;
+      margin: 1rem 0;
+      background: #fff;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.8rem;
+      align-items: end;
+    }
+    label { display: grid; gap: 0.35rem; font-weight: 700; }
+    input, select, button { font: inherit; }
+    input, select {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 0.52rem 0.6rem;
+      border: 1px solid #cfd6e5;
+      border-radius: 4px;
+    }
+    button {
+      border: 0;
+      border-radius: 4px;
+      background: #1f3b6d;
+      color: #fff;
+      padding: 0.55rem 1rem;
+      cursor: pointer;
+      font-weight: 800;
+    }
+    button:disabled { opacity: 0.5; cursor: default; }
+    button.secondary { background: #6b7280; }
+    button.remove { background: #8a271f; padding: 0.4rem 0.7rem; }
+    .actions { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+    .add-pax { display: flex; gap: 0.5rem; align-items: center; margin: 1rem 0 0.5rem; }
+    .add-pax input { width: 5rem; text-align: center; }
+    .status { min-height: 1.4rem; font-weight: 700; }
+    .status.error { color: #8a271f; }
+    .status.dirty { color: #8a5a00; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    th, td { border: 1px solid #d7dce8; padding: 0.35rem; text-align: left; }
+    th { background: #d9e3f7; color: #1f3b6d; padding: 0.5rem; }
+    td input { padding: 0.45rem; }
+    td input.invalid { border-color: #8a271f; background: #fdeceb; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div id="top-nav"></div><script src="/shared/top-nav.js"></script>
+  <h1>Fitness Test</h1>
+
+  <section class="panel">
+    <div class="form-grid">
+      <label>Date <input id="test-date" type="date" required /></label>
+      <label>AO
+        <select id="ao"><option value="">Select an AO</option></select>
+      </label>
+      <div class="actions">
+        <button id="save-btn" type="button" disabled>Save</button>
+        <span id="status" class="status" role="status"></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="results" class="panel hidden">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>PAX Name</th>
+            <th>Burpees</th>
+            <th>Big Boy Situps</th>
+            <th>Hand Release Merkins</th>
+            <th>Plank (seconds)</th>
+            <th>Mile (min:sec)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="add-pax">
+      <button id="add-btn" type="button">Add PAX</button>
+      <input id="add-count" type="number" min="1" max="50" step="1" value="1" aria-label="Number of PAX rows to add" />
+    </div>
+  </section>
+
+  <script>
+    const dateEl = document.getElementById('test-date');
+    const aoEl = document.getElementById('ao');
+    const rowsEl = document.getElementById('rows');
+    const saveBtn = document.getElementById('save-btn');
+    const statusEl = document.getElementById('status');
+    const resultsEl = document.getElementById('results');
+    const countEl = document.getElementById('add-count');
+
+    let loaded = { date: '', ao: '' };
+    let dirty = false;
+
+    function setStatus(msg, cls = '') {
+      statusEl.textContent = msg;
+      statusEl.className = `status ${cls}`.trim();
+    }
+
+    function markDirty() {
+      if (!loaded.ao) return;
+      dirty = true;
+      setStatus('Unsaved changes', 'dirty');
+    }
+
+    async function api(path, options = {}) {
+      const res = await fetch(path, {
+        ...options,
+        headers: { 'content-type': 'application/json', ...(options.headers || {}) },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.ok === false) throw new Error(data?.error?.message || 'Request failed.');
+      return data;
+    }
+
+    function todayLocal() {
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
+
+    function fmtMile(seconds) {
+      if (seconds === null || seconds === undefined) return '';
+      return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+    }
+
+    // "10:16" -> 616. Returns null for blank, NaN for invalid.
+    function parseMile(text) {
+      const t = text.trim();
+      if (!t) return null;
+      const m = /^(\d{1,3}):([0-5]\d)$/.exec(t);
+      return m ? Number(m[1]) * 60 + Number(m[2]) : NaN;
+    }
+
+    function numCell(field, value) {
+      return `<td><input data-f="${field}" type="number" inputmode="numeric" min="0" step="1" value="${value ?? ''}" /></td>`;
+    }
+
+    function addRow(r = {}) {
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        `<td><input data-f="name" type="text" maxlength="100" autocomplete="off" /></td>` +
+        numCell('burpees', r.burpees) +
+        numCell('situps', r.situps) +
+        numCell('merkins', r.merkins) +
+        numCell('plankSeconds', r.plankSeconds) +
+        `<td><input data-f="mile" type="text" inputmode="numeric" placeholder="10:16" maxlength="6" value="${fmtMile(r.mileSeconds)}" /></td>` +
+        `<td><button class="remove" type="button" aria-label="Remove row" title="Remove row">&#10005;</button></td>`;
+      tr.querySelector('[data-f="name"]').value = r.name || '';
+      rowsEl.appendChild(tr);
+      return tr;
+    }
+
+    rowsEl.addEventListener('input', (e) => {
+      e.target.classList.remove('invalid');
+      markDirty();
+    });
+    rowsEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('button.remove');
+      if (!btn) return;
+      btn.closest('tr').remove();
+      markDirty();
+    });
+
+    document.getElementById('add-btn').addEventListener('click', () => {
+      const n = Math.max(1, Math.min(50, parseInt(countEl.value, 10) || 1));
+      countEl.value = n;
+      let first;
+      for (let i = 0; i < n; i++) {
+        const tr = addRow();
+        first ||= tr;
+      }
+      first.querySelector('[data-f="name"]').focus();
+      markDirty();
+    });
+
+    function collect() {
+      const out = [];
+      let ok = true;
+      rowsEl.querySelectorAll('tr').forEach((tr) => {
+        const get = (f) => tr.querySelector(`[data-f="${f}"]`);
+        const row = { name: get('name').value.trim() };
+        ['burpees', 'situps', 'merkins', 'plankSeconds'].forEach((f) => {
+          const el = get(f);
+          const v = el.value.trim();
+          if (v === '') { row[f] = null; return; }
+          const n = Number(v);
+          if (!Number.isInteger(n) || n < 0) { el.classList.add('invalid'); ok = false; }
+          row[f] = n;
+        });
+        const mileEl = get('mile');
+        const mile = parseMile(mileEl.value);
+        if (Number.isNaN(mile)) { mileEl.classList.add('invalid'); ok = false; }
+        row.mileSeconds = mile;
+        out.push(row);
+      });
+      return ok ? out : null;
+    }
+
+    async function load() {
+      const date = dateEl.value;
+      const ao = aoEl.value;
+      rowsEl.innerHTML = '';
+      dirty = false;
+      loaded = { date: '', ao: '' };
+      saveBtn.disabled = true;
+      resultsEl.classList.add('hidden');
+      if (!date || !ao) { setStatus(''); return; }
+      setStatus('Loading...');
+      try {
+        const data = await api(`/api/fitness-test?date=${encodeURIComponent(date)}&ao=${encodeURIComponent(ao)}`);
+        loaded = { date, ao };
+        data.rows.forEach(addRow);
+        resultsEl.classList.remove('hidden');
+        saveBtn.disabled = false;
+        setStatus(data.rows.length ? '' : 'Nothing saved yet for this date and AO.');
+      } catch (err) {
+        setStatus(err.message, 'error');
+      }
+    }
+
+    // Changing date or AO reloads the results. Warn first if there are unsaved edits.
+    function onKeyChange(el) {
+      if (dirty && !confirm('You have unsaved changes. Discard them?')) {
+        el.value = el === dateEl ? loaded.date : loaded.ao;
+        return;
+      }
+      load();
+    }
+    dateEl.addEventListener('change', () => onKeyChange(dateEl));
+    aoEl.addEventListener('change', () => onKeyChange(aoEl));
+
+    saveBtn.addEventListener('click', async () => {
+      const rows = collect();
+      if (!rows) { setStatus('Fix the highlighted boxes (whole numbers; mile as 10:16).', 'error'); return; }
+      saveBtn.disabled = true;
+      setStatus('Saving...');
+      try {
+        const data = await api('/api/fitness-test', {
+          method: 'PUT',
+          body: JSON.stringify({ date: loaded.date, aoId: loaded.ao, rows }),
+        });
+        rowsEl.innerHTML = '';
+        data.rows.forEach(addRow);
+        dirty = false;
+        setStatus('Saved.');
+      } catch (err) {
+        setStatus(err.message, 'error');
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    window.addEventListener('beforeunload', (e) => {
+      if (dirty) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    (async function init() {
+      dateEl.value = todayLocal();
+      try {
+        const data = await api('/api/aos');
+        Object.values(data.regions).flat()
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .forEach((ao) => {
+            const opt = document.createElement('option');
+            opt.value = ao.id;
+            opt.textContent = ao.name;
+            aoEl.appendChild(opt);
+          });
+      } catch (err) {
+        setStatus(err.message, 'error');
+      }
+    })();
+  </script>
+</body>
+</html>
