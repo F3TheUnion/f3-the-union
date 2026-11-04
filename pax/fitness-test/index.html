@@ -80,6 +80,7 @@
       </label>
       <div class="actions">
         <button id="save-btn" type="button" disabled>Save</button>
+        <button id="csv-btn" type="button" class="secondary" disabled>Export CSV</button>
         <span id="status" class="status" role="status"></span>
       </div>
     </div>
@@ -113,6 +114,7 @@
     const aoEl = document.getElementById('ao');
     const rowsEl = document.getElementById('rows');
     const saveBtn = document.getElementById('save-btn');
+    const csvBtn = document.getElementById('csv-btn');
     const statusEl = document.getElementById('status');
     const resultsEl = document.getElementById('results');
     const countEl = document.getElementById('add-count');
@@ -248,6 +250,7 @@
       dirty = false;
       loaded = { date: '', ao: '' };
       saveBtn.disabled = true;
+      csvBtn.disabled = true;
       resultsEl.classList.add('hidden');
       if (!date || !ao) { setStatus(''); return; }
       setStatus('Loading...');
@@ -257,6 +260,7 @@
         data.rows.forEach(addRow);
         resultsEl.classList.remove('hidden');
         saveBtn.disabled = false;
+        csvBtn.disabled = false;
         setStatus(data.rows.length ? '' : 'Nothing saved yet for this date and AO.');
       } catch (err) {
         setStatus(err.message, 'error');
@@ -293,6 +297,33 @@
       } finally {
         saveBtn.disabled = false;
       }
+    });
+
+    function csvCell(value) {
+      let v = String(value ?? '');
+      if (/^[=+\-@\t\r]/.test(v)) v = `'${v}`; // stop spreadsheets treating text as a formula
+      return /[",\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+    }
+
+    csvBtn.addEventListener('click', () => {
+      const header = ['Date', 'AO', 'PAX Name', 'Burpees (min:sec)', 'Big Boy Situps',
+        'Hand Release Merkins', 'Plank (min:sec)', 'Mile (min:sec)'];
+      const aoName = aoEl.options[aoEl.selectedIndex].textContent;
+      const lines = [header.map(csvCell).join(',')];
+      rowsEl.querySelectorAll('tr').forEach((tr) => {
+        const v = (f) => tr.querySelector(`[data-f="${f}"]`).value.trim();
+        lines.push([loaded.date, aoName, v('name'), v('burpeeSeconds'), v('situps'), v('merkins'),
+          v('plankSeconds'), v('mile')].map(csvCell).join(','));
+      });
+      // BOM so Excel reads names with accents correctly.
+      const blob = new Blob(['\uFEFF' + lines.join('\r\n') + '\r\n'], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `fitness-test-${loaded.date}-${loaded.ao}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     });
 
     window.addEventListener('beforeunload', (e) => {
