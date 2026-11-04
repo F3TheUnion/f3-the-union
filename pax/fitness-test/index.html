@@ -54,6 +54,15 @@
     table { width: 100%; border-collapse: collapse; min-width: 760px; }
     th, td { border: 1px solid #d7dce8; padding: 0.35rem; text-align: left; }
     th { background: #d9e3f7; color: #1f3b6d; padding: 0.5rem; }
+    th:first-child, td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      min-width: 7rem;
+      background: #fff;
+      box-shadow: 1px 0 0 #d7dce8;
+    }
+    th:first-child { background: #d9e3f7; }
     td input { padding: 0.45rem; }
     td input.invalid { border-color: #8a271f; background: #fdeceb; }
     .hidden { display: none; }
