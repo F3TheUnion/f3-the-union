@@ -608,7 +608,7 @@ async function getFitnessTest(ctx, url) {
   const aoId = url.searchParams.get('ao');
   await assertFitnessTestKey(ctx, date, aoId);
   const result = await ctx.env.DB.prepare(
-    `SELECT id, pax_name AS name, burpees, big_boy_situps AS situps,
+    `SELECT id, pax_name AS name, burpee_seconds AS burpeeSeconds, big_boy_situps AS situps,
             hand_release_merkins AS merkins, plank_seconds AS plankSeconds,
             mile_seconds AS mileSeconds
      FROM fitness_test_results
@@ -637,10 +637,10 @@ async function saveFitnessTest(ctx, actor) {
   rows.forEach((row, index) => {
     const name = String(row.name || '').trim().slice(0, 100);
     const data = {
-      burpees: fitnessCount(row.burpees, 'Burpees', 9999),
+      burpeeSeconds: fitnessCount(row.burpeeSeconds, 'Burpee time', 36000),
       situps: fitnessCount(row.situps, 'Big Boy Situps', 9999),
       merkins: fitnessCount(row.merkins, 'Hand Release Merkins', 9999),
-      plankSeconds: fitnessCount(row.plankSeconds, 'Plank', 36000),
+      plankSeconds: fitnessCount(row.plankSeconds, 'Plank time', 36000),
       mileSeconds: fitnessCount(row.mileSeconds, 'Mile time', 36000),
     };
     const hasData = Object.values(data).some((v) => v !== null);
@@ -655,11 +655,11 @@ async function saveFitnessTest(ctx, actor) {
       .bind(input.date, input.aoId),
     ...clean.map((r, i) => db.prepare(
       `INSERT INTO fitness_test_results
-         (id, test_date, ao_id, pax_name, burpees, big_boy_situps, hand_release_merkins,
+         (id, test_date, ao_id, pax_name, burpee_seconds, big_boy_situps, hand_release_merkins,
           plank_seconds, mile_seconds, sort_order, updated_at, updated_by_person_id)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).bind(
-      r.id, input.date, input.aoId, r.name, r.burpees, r.situps, r.merkins,
+      r.id, input.date, input.aoId, r.name, r.burpeeSeconds, r.situps, r.merkins,
       r.plankSeconds, r.mileSeconds, i, nowIso(), actor.id,
     )),
   ];
@@ -668,7 +668,7 @@ async function saveFitnessTest(ctx, actor) {
   return json({
     ok: true,
     rows: clean.map((r) => ({
-      id: r.id, name: r.name, burpees: r.burpees, situps: r.situps, merkins: r.merkins,
+      id: r.id, name: r.name, burpeeSeconds: r.burpeeSeconds, situps: r.situps, merkins: r.merkins,
       plankSeconds: r.plankSeconds, mileSeconds: r.mileSeconds,
     })),
   });
