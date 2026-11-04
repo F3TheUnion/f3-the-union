@@ -152,7 +152,7 @@
     }
 
     function timeCell(field, value) {
-      return `<td><input data-f="${field}" type="text" inputmode="numeric" placeholder="1:30" maxlength="6" value="${fmtTime(value)}" /></td>`;
+      return `<td><input data-f="${field}" data-time type="text" inputmode="numeric" placeholder="1:30" maxlength="6" value="${fmtTime(value)}" /></td>`;
     }
 
     function numCell(field, value) {
@@ -167,14 +167,24 @@
         numCell('situps', r.situps) +
         numCell('merkins', r.merkins) +
         timeCell('plankSeconds', r.plankSeconds) +
-        `<td><input data-f="mile" type="text" inputmode="numeric" placeholder="10:16" maxlength="6" value="${fmtTime(r.mileSeconds)}" /></td>` +
+        `<td><input data-f="mile" data-time type="text" inputmode="numeric" placeholder="10:16" maxlength="6" value="${fmtTime(r.mileSeconds)}" /></td>` +
         `<td><button class="remove" type="button" aria-label="Remove row" title="Remove row">&#10005;</button></td>`;
       tr.querySelector('[data-f="name"]').value = r.name || '';
       rowsEl.appendChild(tr);
       return tr;
     }
 
+    // Time boxes: type digits only (numeric keypad has no colon); the colon goes in
+    // before the last two digits, so 1016 becomes 10:16 and 45 becomes 0:45.
+    function formatTimeInput(el) {
+      const digits = el.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(-5);
+      if (!digits) { el.value = ''; return; }
+      const padded = digits.padStart(3, '0');
+      el.value = `${padded.slice(0, -2)}:${padded.slice(-2)}`;
+    }
+
     rowsEl.addEventListener('input', (e) => {
+      if (e.target.hasAttribute('data-time')) formatTimeInput(e.target);
       e.target.classList.remove('invalid');
       markDirty();
     });
