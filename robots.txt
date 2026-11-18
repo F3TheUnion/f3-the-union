@@ -1,4 +1,5 @@
 User-agent: *
+Disallow: /go/
 Disallow: /pax/
 Disallow: /api/
 

@@ -92,3 +92,13 @@ For Node.js scripts that shell out to wrangler, pass the credentials via the `en
 
 - **Never use `BEGIN`/`COMMIT`/`SAVEPOINT` in `.sql` files executed via `wrangler d1 execute`.** D1 rejects transaction statements in SQL files with an error about `state.storage.transaction()`. Just write bare `INSERT`/`CREATE` etc. statements with no transaction wrapper.
 - Always pass `--remote` when targeting production: `npx wrangler d1 execute f3_the_union --remote --file "path/to/file.sql"`
+
+## Outside links (click counting)
+
+Static pages' links to other sites point at `/go/<name>` and open in a new tab; the `# go-links` block in `_redirects` (above the splat rules) sends each to the real address, and Cloudflare logs the click for `C:/code/site-stats`. After adding or editing a static page with outside links, run from the repo root (Git Bash needs `MSYS_NO_PATHCONV=1`):
+
+```bash
+node C:/code/go-links/go-links.mjs . --base /go/ --own f3theunion.com,www.f3theunion.com --skip node_modules,docs,data,media,migrations,functions,workers,site-stats.html
+```
+
+Safe to re-run. Links built by JavaScript or Functions are not covered.
