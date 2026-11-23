@@ -385,7 +385,6 @@ button:disabled {
 }
 
 .pillar {
-  min-height: 190px;
   padding: 1.25rem;
   background: var(--field);
 }
