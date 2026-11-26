@@ -117,7 +117,7 @@ const AO_CONFIG = [
   { ao: 'The Dock',       channelId: SLACK_CHANNEL_THE_DOCK,       enabled: true, weeksAhead: 2 },
   { ao: 'The Cafeteria',  channelId: SLACK_CHANNEL_THE_CAFETERIA,  enabled: true, weeksAhead: 2 },
   { ao: 'The Forge',      channelId: SLACK_CHANNEL_THE_FORGE,      enabled: true, weeksAhead: 2 },
-  { ao: 'The Breakroom',  channelId: SLACK_CHANNEL_THE_BREAKROOM,  enabled: true, weeksAhead: 2 },
+  { ao: 'The Breakroom',  channelId: SLACK_CHANNEL_THE_BREAKROOM,  enabled: false, weeksAhead: 2 },
 ];
 
 function getAoToSiteQMap() {
